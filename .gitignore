@@ -1,0 +1,5 @@
+node_modules/
+*.draft.json
+*.draft.md
+*.tgz
+.env
