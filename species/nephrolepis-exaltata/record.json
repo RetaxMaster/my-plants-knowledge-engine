@@ -1,0 +1,92 @@
+{
+  "scientificName": "Nephrolepis exaltata",
+  "commonNames": [
+    "Boston fern",
+    "Sword fern"
+  ],
+  "watering": {
+    "baseIntervalDays": 4,
+    "soilDrynessBeforeWatering": "keep-moist",
+    "droughtTolerance": "low",
+    "temperatureSensitivity": "medium",
+    "lightSensitivity": "medium",
+    "reduceInDormancy": true
+  },
+  "light": {
+    "minimum": "medium",
+    "ideal": "bright-indirect",
+    "maximum": "bright-indirect"
+  },
+  "temperature": {
+    "survivalMinC": 5,
+    "idealMinC": 18,
+    "idealMaxC": 24,
+    "survivalMaxC": 35
+  },
+  "humidity": {
+    "minimumPct": 50,
+    "idealPct": 75
+  },
+  "fertilizing": {
+    "activeSeasons": [
+      "spring",
+      "summer",
+      "autumn"
+    ],
+    "inSeasonFrequencyDays": 30,
+    "reduceInDormancy": true
+  },
+  "repotting": {
+    "typicalIntervalMonths": 24,
+    "signs": [
+      "Roots filling the pot or growing out of drainage holes",
+      "Soil dries out faster than usual between waterings",
+      "Crowded crown with declining frond vigor",
+      "Plant has outgrown its container and needs division"
+    ]
+  },
+  "maintenance": {
+    "pruning": "Remove old, dead, or browning fronds at soil level to encourage fresh growth; if the plant sheds heavily after drying out, fronds can be cut back to about 2 inches (5 cm) to regenerate.",
+    "rotationDays": 14,
+    "leafCleaningDays": null,
+    "commonPests": [
+      "Scale insects",
+      "Mealybugs",
+      "Spider mites",
+      "Slugs and snails",
+      "Whitefly"
+    ]
+  },
+  "nativeClimate": {
+    "description": "Native to humid tropical and subtropical forests, with a pantropical distribution spanning Florida, the West Indies, Mexico, Central and South America, Polynesia, and parts of Africa. It grows as an understory and epiphytic fern in warm, shaded, consistently moist and highly humid environments.",
+    "koppen": "Af",
+    "hardinessMinC": -6.7,
+    "hardinessMaxC": 4.4
+  },
+  "metadata": {
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Boston Fern, Nephrolepis exaltata var. Bostoniensis – Wisconsin Horticulture (UW–Madison Division of Extension)",
+        "url": "https://hort.extension.wisc.edu/articles/boston-fern-nephrolepis-exaltata-bostoniensis/",
+        "accessedAt": "2026-06-18"
+      },
+      {
+        "title": "Nephrolepis exaltata – Missouri Botanical Garden Plant Finder",
+        "url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?kempercode=c548",
+        "accessedAt": "2026-06-18"
+      },
+      {
+        "title": "Nephrolepis exaltata (sword fern) – Royal Horticultural Society (RHS)",
+        "url": "https://www.rhs.org.uk/plants/11508/nephrolepis-exaltata/details",
+        "accessedAt": "2026-06-18"
+      },
+      {
+        "title": "Nephrolepis exaltata: Boston Fern, Sword Fern (FPS427) – University of Florida IFAS Extension",
+        "url": "https://ask.ifas.ufl.edu/publication/FP427",
+        "accessedAt": "2026-06-18"
+      }
+    ],
+    "briefPath": "brief.md"
+  }
+}
