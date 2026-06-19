@@ -17,11 +17,16 @@ const record = {
 } satisfies SpeciesRecord;
 
 describe('buildSpeciesRow', () => {
-  it('derives slug + scientificName + a JSON record string + brief', () => {
-    const row = buildSpeciesRow(record, '# Boston fern\n\nA lush, humidity-loving fern.');
+  it('derives slug + scientificName + a JSON record string + both briefs', () => {
+    const row = buildSpeciesRow(
+      record,
+      '# Boston fern\n\nA lush, humidity-loving fern.',
+      '# Helecho de Boston\n\nUn helecho frondoso que ama la humedad.',
+    );
     expect(row.slug).toBe('nephrolepis-exaltata');
     expect(row.scientificName).toBe('Nephrolepis exaltata');
     expect(JSON.parse(row.recordJson).light.ideal).toBe('bright-indirect');
-    expect(row.brief).toContain('Boston fern');
+    expect(row.briefEn).toContain('Boston fern');
+    expect(row.briefEs).toContain('Helecho de Boston');
   });
 });

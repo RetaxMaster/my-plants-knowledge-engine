@@ -17,7 +17,7 @@ async function main(): Promise<void> {
 
   const conn = await connectToDb();
   const [rows] = await conn.execute<RowDataPacket[]>(
-    'SELECT `slug`, `scientific_name`, `record`, `brief` FROM `species` WHERE `slug` = ? LIMIT 1',
+    'SELECT `slug`, `scientific_name`, `record`, `brief_en`, `brief_es` FROM `species` WHERE `slug` = ? LIMIT 1',
     [slug],
   );
   await conn.end();
@@ -33,8 +33,10 @@ async function main(): Promise<void> {
   console.log(`FOUND: ${row.slug} (${row.scientific_name})`);
   console.log('--- RECORD (JSON) ---');
   console.log(JSON.stringify(record, null, 2));
-  console.log('--- BRIEF (Markdown) ---');
-  console.log(row.brief ?? '(no brief stored)');
+  console.log('--- BRIEF (English, Markdown) ---');
+  console.log(row.brief_en ?? '(no English brief stored)');
+  console.log('--- BRIEF (Spanish, Markdown) ---');
+  console.log(row.brief_es ?? '(no Spanish brief stored)');
   console.log('--- END ---');
 }
 

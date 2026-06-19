@@ -1,10 +1,10 @@
 # MyPlants Knowledge Engine — Onboarding Workflow
 
 You are the operator. Given a plant name, you drive the `plant-researcher` subagent and the
-deterministic scripts to produce ONE validated curated species record plus its Markdown brief,
-and persist BOTH directly to the database. The **database is the single source of truth**; the
-files Claude generates during research (`*.draft.json`, `*.draft.md`) are ephemeral scratch that
-must not survive the session.
+deterministic scripts to produce ONE validated curated species record plus its Markdown brief
+**in both English and Spanish**, and persist them directly to the database. The **database is
+the single source of truth**; the files Claude generates during research (`*.draft.json`,
+`*.draft.md`) are ephemeral scratch that must not survive the session.
 
 **You decide whether a species already exists — the scripts never decide for you.** They only
 surface data (`db:list` = the catalog, `db:find` = one species' full data). You reason over that
@@ -38,23 +38,26 @@ data and judge, critically, whether it is truly the same species.
 
 ## Step 2 — Research (fresh or enrich)
 
-Invoke the `plant-researcher` subagent. It returns a complete draft record + draft brief and
-never writes files or touches the DB.
+Invoke the `plant-researcher` subagent. It returns a complete draft record + a brief in BOTH
+English and Spanish, and never writes files or touches the DB.
 - **Fresh:** pass the resolved scientific name (and any trusted sources the user gave).
-- **Enrich:** also pass the existing record + brief from `db:find` so it UPDATES/enriches them
-  instead of starting blank. It returns the complete improved record + brief (not a diff).
+- **Enrich:** also pass the existing record + both briefs from `db:find` so it UPDATES/enriches
+  them instead of starting blank. It returns the complete improved record + both briefs (not a
+  diff).
 
 ## Step 3 — Validate, persist, clean up
 
-1. Write the returned drafts to temp files, e.g. `<slug>.draft.json` and `<slug>.draft.md`
-   (these match `.gitignore` and are never committed).
+1. Write the returned drafts to temp files: `<slug>.draft.json` (record), `<slug>.en.draft.md`
+   (English brief) and `<slug>.es.draft.md` (Spanish brief). All three match `.gitignore` and are
+   never committed.
 2. **Validate (the gate):** `npm run validate -- --record <slug>.draft.json`. On failure, give
    the issues back to the subagent and re-validate — never hand-edit values to force a pass.
 3. **Persist (the ONLY way knowledge enters the DB):**
-   `set -a; source .env; set +a && npm run db:insert -- --record <slug>.draft.json --brief <slug>.draft.md`
-   (tsx does not auto-load `.env`). It re-validates the record and **upserts** record + brief into
-   the `species` table — so an enrich pass simply overwrites the stored row. The table is created
-   by `my-plants-api`'s migration, which must have run first. Never write rows by hand.
+   `set -a; source .env; set +a && npm run db:insert -- --record <slug>.draft.json --brief-en <slug>.en.draft.md --brief-es <slug>.es.draft.md`
+   (tsx does not auto-load `.env`). It re-validates the record, requires both briefs to be
+   non-empty, and **upserts** record + both briefs into the `species` table — so an enrich pass
+   simply overwrites the stored row. The table is created by `my-plants-api`'s migration, which
+   must have run first. Never write rows by hand.
 4. **Delete the temp drafts** and report: slug, `metadata.confidence`, source count, and whether
    it was a fresh insert or an enrichment.
 
