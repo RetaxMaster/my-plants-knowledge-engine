@@ -4,12 +4,14 @@ export interface SpeciesRow {
   slug: string;
   scientificName: string;
   recordJson: string;
+  brief: string;
 }
 
-export function buildSpeciesRow(record: SpeciesRecord): SpeciesRow {
+export function buildSpeciesRow(record: SpeciesRecord, brief: string): SpeciesRow {
   return {
     slug: toSpeciesSlug(record.scientificName),
     scientificName: record.scientificName,
     recordJson: JSON.stringify(record),
+    brief,
   };
 }

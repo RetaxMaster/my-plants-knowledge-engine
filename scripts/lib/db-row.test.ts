@@ -13,14 +13,15 @@ const record = {
   repotting: { typicalIntervalMonths: 18, signs: [] },
   maintenance: { pruning: 'Trim dead fronds.', rotationDays: 14, leafCleaningDays: null, commonPests: [] },
   nativeClimate: { description: 'Humid tropical forests.', hardinessMinC: 7, hardinessMaxC: 32 },
-  metadata: { confidence: 'high', sources: [{ title: 'RHS', url: 'https://www.rhs.org.uk/', accessedAt: '2026-06-18' }], briefPath: 'brief.md' },
+  metadata: { confidence: 'high', sources: [{ title: 'RHS', url: 'https://www.rhs.org.uk/', accessedAt: '2026-06-18' }] },
 } satisfies SpeciesRecord;
 
 describe('buildSpeciesRow', () => {
-  it('derives slug + scientificName + a JSON record string', () => {
-    const row = buildSpeciesRow(record);
+  it('derives slug + scientificName + a JSON record string + brief', () => {
+    const row = buildSpeciesRow(record, '# Boston fern\n\nA lush, humidity-loving fern.');
     expect(row.slug).toBe('nephrolepis-exaltata');
     expect(row.scientificName).toBe('Nephrolepis exaltata');
     expect(JSON.parse(row.recordJson).light.ideal).toBe('bright-indirect');
+    expect(row.brief).toContain('Boston fern');
   });
 });
