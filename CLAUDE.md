@@ -44,6 +44,11 @@ English and Spanish, and never writes files or touches the DB.
 - **Enrich:** also pass the existing record + both briefs from `db:find` so it UPDATES/enriches
   them instead of starting blank. It returns the complete improved record + both briefs (not a
   diff).
+- **Cultivars (both modes):** the research MUST find all the well-known named varieties
+  (cultivars) of the species and fill the record's `cultivars` field — they are informational
+  only (identity/appearance, never care overrides), and the same varieties must be summarised in
+  a short cultivars section of both briefs. A species with no notable cultivars yields an empty
+  array and no brief section.
 
 ## Step 3 — Validate, persist, clean up
 

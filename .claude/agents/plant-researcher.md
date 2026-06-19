@@ -41,8 +41,19 @@ droughtTolerance, temperatureSensitivity, lightSensitivity, reduceInDormancy), `
 survivalMaxC), `humidity` (minimumPct ≤ idealPct), `fertilizing` (activeSeasons,
 inSeasonFrequencyDays, reduceInDormancy), `repotting` (typicalIntervalMonths, signs),
 `maintenance` (pruning, rotationDays|null, leafCleaningDays|null, commonPests),
-`nativeClimate` (description, koppen?, hardinessMinC ≤ hardinessMaxC), and `metadata`
-(confidence, sources:[{title,url,accessedAt:"YYYY-MM-DD"}]).
+`nativeClimate` (description, koppen?, hardinessMinC ≤ hardinessMaxC), `cultivars`, and
+`metadata` (confidence, sources:[{title,url,accessedAt:"YYYY-MM-DD"}]).
+
+**`cultivars` — research ALL the well-known named varieties of the species.** A cultivar is a
+human-selected variety within the SAME species (e.g. *Dracaena fragrans* 'Massangeana', 'Lemon
+Lime'); it is NOT a subspecies and NOT a different species. This field is **purely
+informational** — identity and appearance for a human reader, never care overrides — so do NOT
+encode care numbers here. Each entry: `name` (the cultivar epithet), `alsoKnownAs` (trade/common
+names, `[]` if none), `group` (cultivar group such as "Deremensis Group", or `null`),
+`description` (what visually distinguishes it — variegation, leaf shape, colour), and `careNote`
+(a SHORT free-text nuance vs. the species' baseline care, e.g. "more variegation needs brighter
+indirect light to keep colour", or `null` when care is effectively identical). If the species has
+no notable named cultivars, return an empty array.
 
 Controlled vocabularies: light = low|medium|bright-indirect|direct; sensitivity / drought /
 confidence = low|medium|high; seasons = spring|summer|autumn|winter; soil dryness =
@@ -51,7 +62,10 @@ invent a source; only list sources you actually consulted.
 
 ### 2. Draft brief — in BOTH English AND Spanish (two Markdown documents)
 A friendly, informative blogpost about the species for a curious owner: origins, natural
-habitat, what it needs to thrive, common mistakes, and fun facts. **Return it twice: one
+habitat, what it needs to thrive, common mistakes, and fun facts. **When the species has named
+cultivars, include a short section about them** — name the popular varieties and describe how
+they differ in appearance (and any small care nuance), so a reader can recognise which one they
+own. Keep it consistent with the `cultivars` field of the record. **Return the brief twice: one
 English version and one Spanish version**, clearly labelled, with equivalent content (the
 Spanish is a natural, fluent rendition for a Spanish-speaking owner — not a word-for-word
 machine translation). Both are persisted to the DB for humans to read; the deterministic care
