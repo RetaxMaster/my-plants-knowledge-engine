@@ -6,7 +6,8 @@
   "private": true,
   "scripts": {
     "validate": "tsx scripts/validate.ts",
-    "db:get": "tsx scripts/db-get.ts",
+    "db:list": "tsx scripts/db-list.ts",
+    "db:find": "tsx scripts/db-find.ts",
     "db:insert": "tsx scripts/db-insert.ts",
     "test": "vitest run",
     "test:watch": "vitest",
