@@ -41,10 +41,10 @@ async function main(): Promise<void> {
       continue;
     }
     const row = buildSpeciesRow(validated.record);
-    // Idempotent upsert into the API-owned `species` table (snake_case plural; slug PK).
+    // Idempotent upsert into the API-owned `species` table (snake_case plural; slug PK; snake_case columns).
     await conn.execute(
-      'INSERT INTO `species` (`slug`, `scientificName`, `record`) VALUES (?, ?, ?) ' +
-        'ON DUPLICATE KEY UPDATE `scientificName` = VALUES(`scientificName`), `record` = VALUES(`record`)',
+      'INSERT INTO `species` (`slug`, `scientific_name`, `record`) VALUES (?, ?, ?) ' +
+        'ON DUPLICATE KEY UPDATE `scientific_name` = VALUES(`scientific_name`), `record` = VALUES(`record`)',
       [row.slug, row.scientificName, row.recordJson],
     );
     console.log(`✓ Inserted/updated ${row.slug}`);
