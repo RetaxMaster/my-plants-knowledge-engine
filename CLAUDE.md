@@ -1,8 +1,10 @@
 # MyPlants Knowledge Engine — Onboarding Workflow
 
-You are the operator. Given a plant name, you drive the `plant-researcher` subagent and the
-deterministic scripts to produce ONE validated curated species record plus its Markdown brief
-**in both English and Spanish**, and persist them directly to the database. The **database is
+You are the operator. Given a plant name, you drive the `plant-researcher` subagent, the
+`editorial-writer` subagent, and the deterministic scripts to produce ONE validated curated species
+record plus its Markdown brief **in both English and Spanish**, and persist them directly to the
+database. Authoring is two-step: the `plant-researcher` writes ONE raw English brief, then the
+`editorial-writer` turns that brief into the polished English and Spanish versions. The **database is
 the single source of truth**; the files Claude generates during research (`*.draft.json`,
 `*.draft.md`) are ephemeral scratch that must not survive the session.
 
@@ -38,23 +40,31 @@ data and judge, critically, whether it is truly the same species.
 
 ## Step 2 — Research (fresh or enrich)
 
-Invoke the `plant-researcher` subagent. It returns a complete draft record + a brief in BOTH
-English and Spanish, and never writes files or touches the DB.
+Invoke the `plant-researcher` subagent. It returns a complete draft record + ONE raw English
+brief, and never writes files or touches the DB.
 - **Fresh:** pass the resolved scientific name (and any trusted sources the user gave).
-- **Enrich:** also pass the existing record + both briefs from `db:find` so it UPDATES/enriches
-  them instead of starting blank. It returns the complete improved record + both briefs (not a
-  diff).
+- **Enrich:** also pass the existing record + the existing English brief (the stored `brief_en`)
+  from `db:find` as the baseline, so it UPDATES/enriches them instead of starting blank. It returns
+  the complete improved record + improved raw English brief (not a diff).
 - **Cultivars (both modes):** the research MUST find all the well-known named varieties
   (cultivars) of the species and fill the record's `cultivars` field — they are informational
   only (identity/appearance, never care overrides), and the same varieties must be summarised in
-  a short cultivars section of both briefs. A species with no notable cultivars yields an empty
-  array and no brief section.
+  a short cultivars section of the raw English brief. A species with no notable cultivars yields an
+  empty array and no brief section.
+
+## Step 2.5 — Editorialize (the house voice)
+
+Invoke the `editorial-writer` subagent (you, the operator, invoke it — a subagent cannot invoke
+another subagent). Pass it the researcher's **raw English brief** and the **draft record** (its
+factual anchor). It returns TWO polished Markdown briefs — English and Spanish — in one consistent
+house voice. These two are the briefs you persist. The editorial-writer never adds facts; if it asks
+for a fact not present, the gap is in the researcher's brief — go back to Step 2, do not invent it.
 
 ## Step 3 — Validate, persist, clean up
 
 1. Write the returned drafts to temp files: `<slug>.draft.json` (record), `<slug>.en.draft.md`
-   (English brief) and `<slug>.es.draft.md` (Spanish brief). All three match `.gitignore` and are
-   never committed.
+   (the editorial English brief) and `<slug>.es.draft.md` (the editorial Spanish brief). All three
+   match `.gitignore` and are never committed.
 2. **Validate (the gate):** `npm run validate -- --record <slug>.draft.json`. On failure, give
    the issues back to the subagent and re-validate — never hand-edit values to force a pass.
 3. **Persist (the ONLY way knowledge enters the DB):**
