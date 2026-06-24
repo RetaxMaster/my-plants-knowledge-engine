@@ -5,7 +5,8 @@ import { buildSpeciesRow } from './db-row.js';
 const record = {
   scientificName: 'Nephrolepis exaltata',
   commonNames: ['Boston fern'],
-  watering: { baseIntervalDays: 4, soilDrynessBeforeWatering: 'keep-moist', droughtTolerance: 'low', temperatureSensitivity: 'medium', lightSensitivity: 'medium', reduceInDormancy: false },
+  watering: { baseIntervalDays: 4, soilDrynessBeforeWatering: 'keep-moist', droughtTolerance: 'low', temperatureSensitivity: 'medium', lightSensitivity: 'medium', humiditySensitivity: 'high', reduceInDormancy: false },
+  misting: { benefit: 'beneficial', baseFrequencyDays: 3, note: null },
   light: { minimum: 'medium', ideal: 'bright-indirect', maximum: 'bright-indirect' },
   temperature: { survivalMinC: 7, idealMinC: 16, idealMaxC: 24, survivalMaxC: 30 },
   humidity: { minimumPct: 50, idealPct: 80 },

@@ -12,7 +12,7 @@ function requireEnv(name: string): string {
 }
 
 // Single place that opens the connection to the API-owned MariaDB, shared by every DB script
-// (db:get, db:insert) so the connection contract never drifts between them.
+// (db:list, db:find, db:dump, db:insert) so the connection contract never drifts between them.
 export async function connectToDb(): Promise<Connection> {
   return createConnection({
     host: requireEnv('DB_HOST'),

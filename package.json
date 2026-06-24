@@ -8,6 +8,7 @@
     "validate": "tsx scripts/validate.ts",
     "db:list": "tsx scripts/db-list.ts",
     "db:find": "tsx scripts/db-find.ts",
+    "db:dump": "tsx scripts/db-dump.ts",
     "db:insert": "tsx scripts/db-insert.ts",
     "test": "vitest run",
     "test:watch": "vitest",
