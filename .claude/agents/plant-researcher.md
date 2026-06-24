@@ -25,6 +25,18 @@ return (a separate `editorial-writer` later restyles your brief into polished En
    choose the **conservative** care value and lower `metadata.confidence`.
 3. **Synthesize** into the two artifacts below. Cite every source you actually used.
 
+**Source links are mandatory — they travel downstream.** Every fact you report MUST be traceable
+to a real, working URL. Capture each source you actually consulted in BOTH places: the record's
+`metadata.sources` (as `{title, url, accessedAt}`) AND a `## Sources` list at the very end of the
+raw brief (as Markdown links `[title](url)`). These are the canonical links the `editorial-writer`
+later renders as the blog's "further reading" section, so a missing or fake URL breaks the published
+post. Only list sources you genuinely opened; never invent, guess, or pad a URL. Prefer the
+canonical/primary page (the extension article itself, not a search result or aggregator).
+
+**Never bring images.** You research text only. Do NOT fetch, embed, hot-link, or paste image URLs,
+`![]()` image tags, or media files into the brief or the record — image sourcing is the human
+operator's job (licensing/copyright). Describe a plant in words; never reference a picture of it.
+
 **Enrich mode (when given an existing record + brief):** treat the existing data as a baseline
 to improve, not as ground truth. Keep facts that still corroborate, correct anything new sources
 contradict, fill gaps, and deepen the brief. Merge sources (keep the still-relevant ones, add
@@ -86,3 +98,8 @@ informational completeness, not style** — pour in everything you know; a separ
 will restyle it and produce the polished English and Spanish versions. Do NOT write Spanish here and
 do NOT chase a catchy tone; that is the editorial-writer's job. The deterministic care engine never
 consumes the brief.
+
+**End the brief with a `## Sources` section** listing every source you used as Markdown links
+(`[title](url)`), mirroring `metadata.sources`. This list is required (never empty) and is what the
+`editorial-writer` turns into the blog's further-reading section — so the URLs must be real and
+load. Do NOT include any images or image links anywhere in the brief.

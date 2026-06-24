@@ -51,6 +51,9 @@ brief, and never writes files or touches the DB.
   only (identity/appearance, never care overrides), and the same varieties must be summarised in
   a short cultivars section of the raw English brief. A species with no notable cultivars yields an
   empty array and no brief section.
+- **Sources & images:** the raw brief always ends with a `## Sources` list (Markdown links mirroring
+  `metadata.sources`) so real URLs travel downstream, and it contains NO images or image links
+  (image sourcing is the human operator's job — copyright).
 
 ## Step 2.5 — Editorialize (the house voice)
 
@@ -59,6 +62,10 @@ another subagent). Pass it the researcher's **raw English brief** and the **draf
 factual anchor). It returns TWO polished Markdown briefs — English and Spanish — in one consistent
 house voice. These two are the briefs you persist. The editorial-writer never adds facts; if it asks
 for a fact not present, the gap is in the researcher's brief — go back to Step 2, do not invent it.
+Each polished brief ends with a hyperlinked further-reading section (`## Want to dig deeper?` /
+`## Por si quieres profundizar más`) built only from the source links it was given, and carries
+`> 📸 Image idea:` blockquote notes marking where the operator should later place real images — the
+editorial-writer never fetches or embeds images itself.
 
 ## Step 3 — Validate, persist, clean up
 
@@ -75,6 +82,43 @@ for a fact not present, the gap is in the researcher's brief — go back to Step
    must have run first. Never write rows by hand.
 4. **Delete the temp drafts** and report: slug, `metadata.confidence`, source count, and whether
    it was a fresh insert or an enrichment.
+
+## Editing existing curated data (targeted curator edits)
+
+Separate from onboarding: when the user asks to CHANGE something in an **already-curated** species —
+a data field, or anything in either blogpost — you drive a **read–modify–write** edit. You never
+touch the DB by hand; you go through the deterministic scripts and you change **only what was asked**.
+
+1. **Resolve & pull.** Resolve the target to a slug, then `npm run db:dump -- --name "<scientific
+   name>"` (or `--slug <slug>`) — it writes the stored `record` + both briefs to draft files. Keep an
+   untouched copy of each file you'll change (e.g. `cp <slug>.draft.json <slug>.draft.json.orig`) so
+   you can diff it later. The drafts are ephemeral (gitignored) — delete them when done.
+
+2. **Classify the change and edit ONLY the target.** Everything you don't touch must survive
+   byte-for-byte — never re-research, never rephrase untouched prose, never regenerate a whole brief.
+   - **Data field (record):** edit the JSON draft. Data and prose must agree, so if the changed value
+     is also stated in a blog, you MUST update that mention in BOTH `brief_en` and `brief_es` (via the
+     `editorial-writer` in edit mode) so the posts never contradict the record.
+   - **Trivial prose** (a typo, a link, an image note): edit the brief draft(s) directly.
+   - **Non-trivial prose** (rewriting a paragraph/section): hand the current EN + ES posts and the
+     scoped change to the `editorial-writer` in **edit mode**; it returns the full updated posts with
+     the house voice and EN/ES parity preserved. Any factual change must land in BOTH languages.
+
+3. **Re-validate if the record changed.** `npm run validate -- --record <slug>.draft.json`. If the
+   user's value breaks a schema invariant (e.g. `idealMinC ≤ idealMaxC`, `minimum ≤ ideal ≤ maximum`),
+   **report it back to the user** — never force it or silently "fix" neighbouring values to pass.
+
+4. **Diff + confirm (the write has no undo).** Show the user a diff of every changed artifact
+   (`.orig` → edited) and WAIT for their explicit OK before persisting — the upsert overwrites the
+   whole row.
+
+5. **Persist & clean up.** `set -a; source .env; set +a && npm run db:insert -- --record
+   <slug>.draft.json --brief-en <slug>.en.draft.md --brief-es <slug>.es.draft.md` upserts the
+   complete updated row. Delete the drafts (and `.orig` copies) and report what changed.
+
+**The user is the curator: their requested fact wins.** Apply the value they ask for as given; do not
+re-research it or change other fields on your own. Deleting a species is out of scope — these scripts
+only read and upsert. The no-images rule still holds (notes, never real images).
 
 ## Rules
 
