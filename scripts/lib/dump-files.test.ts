@@ -1,20 +1,27 @@
 import { describe, expect, it } from 'vitest';
 import { buildDumpFiles, type StoredSpeciesRow } from './dump-files.js';
 
+const blogpost = {
+  titleEs: 'Costilla de Adán',
+  titleEn: 'Swiss cheese plant',
+  excerptEs: 'Hojas perforadas y un carácter tranquilo.',
+  excerptEn: 'Fenestrated leaves and an easygoing nature.',
+  bodyEs: '# Costilla de Adán\nContenido.',
+  bodyEn: '# Swiss cheese plant\nContent.',
+};
+
 const baseRow: StoredSpeciesRow = {
   slug: 'monstera-deliciosa',
   record: { scientificName: 'Monstera deliciosa', commonNames: ['Swiss cheese plant'] },
-  briefEn: '# Swiss cheese plant\n\nFenestrated leaves and an easygoing nature.',
-  briefEs: '# Costilla de Adán\n\nHojas perforadas y un carácter tranquilo.',
+  blogpost,
 };
 
 describe('buildDumpFiles', () => {
-  it('emits the three slug-based draft files in order (record, en, es)', () => {
+  it('emits the record draft + the blogpost draft (in order) when a blogpost is stored', () => {
     const files = buildDumpFiles(baseRow);
     expect(files.map((f) => f.path)).toEqual([
       'monstera-deliciosa.draft.json',
-      'monstera-deliciosa.en.draft.md',
-      'monstera-deliciosa.es.draft.md',
+      'monstera-deliciosa.blogpost.draft.json',
     ]);
   });
 
@@ -30,24 +37,37 @@ describe('buildDumpFiles', () => {
     expect(JSON.parse(files[0].content).scientificName).toBe('Monstera deliciosa');
   });
 
-  it('writes each brief verbatim and falls back to an empty string when a column is NULL', () => {
-    const files = buildDumpFiles({ ...baseRow, briefEs: null });
-    expect(files[1].content).toBe(baseRow.briefEn);
-    expect(files[2].content).toBe('');
+  it('round-trips the blogpost draft: exact six fields, re-parseable into db:insert', () => {
+    const files = buildDumpFiles(baseRow);
+    const parsed = JSON.parse(files[1].content);
+    expect(parsed).toEqual(blogpost);
+    expect(files[1].content.endsWith('\n')).toBe(true);
   });
 
-  it('never appends a trailing newline to a brief (only the record gets one)', () => {
-    const files = buildDumpFiles(baseRow);
-    expect(files[1].content.endsWith('\n')).toBe(false);
-    expect(files[2].content.endsWith('\n')).toBe(false);
+  it('dumps NULL English fields as JSON null — NEVER an empty string (would fail min(1)-when-present on re-insert)', () => {
+    const files = buildDumpFiles({
+      ...baseRow,
+      blogpost: { ...blogpost, titleEn: null, excerptEn: null, bodyEn: null },
+    });
+    const parsed = JSON.parse(files[1].content);
+    expect(parsed.titleEn).toBeNull();
+    expect(parsed.excerptEn).toBeNull();
+    expect(parsed.bodyEn).toBeNull();
+    // Explicitly NOT the empty string the old brief transform produced for NULL columns.
+    expect(parsed.titleEn).not.toBe('');
+    expect(parsed.bodyEn).not.toBe('');
+  });
+
+  it('dumps ONLY the record draft when the species has no blogpost yet (no empty blogpost draft)', () => {
+    const files = buildDumpFiles({ ...baseRow, blogpost: null });
+    expect(files.map((f) => f.path)).toEqual(['monstera-deliciosa.draft.json']);
   });
 
   it('prefixes every file with the given out-dir', () => {
     const files = buildDumpFiles(baseRow, '/tmp/work');
     expect(files.map((f) => f.path)).toEqual([
       '/tmp/work/monstera-deliciosa.draft.json',
-      '/tmp/work/monstera-deliciosa.en.draft.md',
-      '/tmp/work/monstera-deliciosa.es.draft.md',
+      '/tmp/work/monstera-deliciosa.blogpost.draft.json',
     ]);
   });
 });
