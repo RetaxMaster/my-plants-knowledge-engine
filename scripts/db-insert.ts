@@ -4,6 +4,7 @@ import { buildSpeciesRow, buildBlogpostRow } from './lib/db-row.js';
 import { validateRecord } from './lib/validate.js';
 import { connectToDb } from './lib/db.js';
 import { SPECIES_UPSERT_SQL, BLOGPOST_UPSERT_SQL } from './lib/db-sql.js';
+import { parseBlogpostPayload } from './lib/parse-payload.js';
 
 // Persist ONE curated species into the API-owned DB: the `species` record row AND its related
 // `blogposts` row, in a single transaction. The blogpost is created DRAFT (status = 0); publishing is a
@@ -39,10 +40,13 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  // 2) Parse the BLOGPOST author payload (the editorial-writer's six-key JSON).
+  // 2) Parse the BLOGPOST author payload (the editorial-writer's six-key JSON). The writer returns it
+  //    inside a fenced ```json block and the operator saves that reply VERBATIM, so tolerate an optional
+  //    outer code fence here (a plain .json file parses unchanged; inner ``` code fences in the body
+  //    Markdown are preserved — see parse-payload.ts).
   let payload: unknown;
   try {
-    payload = JSON.parse(await readFile(values.blogpost, 'utf8'));
+    payload = parseBlogpostPayload(await readFile(values.blogpost, 'utf8'));
   } catch (err) {
     console.error(`✗ ${values.blogpost} is not valid JSON: ${(err as Error).message}`);
     process.exit(1);

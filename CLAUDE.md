@@ -76,8 +76,10 @@ before publishing. The editorial-writer never fetches or embeds images itself.
 ## Step 3 — Validate, persist, clean up
 
 1. Write the returned drafts to temp files: `<slug>.draft.json` (the record) and
-   `<slug>.blogpost.draft.json` (the editorial-writer's six-key JSON, saved verbatim). Both match
-   `.gitignore` and are never committed.
+   `<slug>.blogpost.draft.json` (the editorial-writer's six-key JSON, saved verbatim — the surrounding
+   ` ```json ` fence is fine: `db:insert` strips an optional outer code fence before parsing, and inner
+   ` ``` ` code fences inside the body Markdown are preserved). Both match `.gitignore` and are never
+   committed.
 2. **Validate the record (the gate):** `npm run validate -- --record <slug>.draft.json`. On failure,
    give the issues back to the subagent and re-validate — never hand-edit values to force a pass. (The
    blogpost payload is validated by `db:insert` itself against the shared `blogpost` contract in the
