@@ -40,7 +40,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  // 2) Parse the BLOGPOST author payload (the editorial-writer's six-key JSON). The writer returns it
+  // 2) Parse the BLOGPOST author payload (the editorial-writer's seven-key JSON). The writer returns it
   //    inside a fenced ```json block and the operator saves that reply VERBATIM, so tolerate an optional
   //    outer code fence here (a plain .json file parses unchanged; inner ``` code fences in the body
   //    Markdown are preserved — see parse-payload.ts).

@@ -21,9 +21,10 @@ export function buildSpeciesRow(record: SpeciesRecord): SpeciesRow {
   };
 }
 
-// The AUTHORED subset the editorial-writer emits (six keys) — NOT a full BlogpostInput. Spanish leads
-// (required, non-empty); English is nullable. Everything else (slug, speciesSlug, status, cover/CTA)
-// is derived/owned by the engine or the human, never by the writer.
+// The AUTHORED subset the editorial-writer emits (seven keys) — NOT a full BlogpostInput. Spanish leads
+// (required, non-empty); English is nullable; coverImagePrompt is language-neutral and nullable.
+// Everything else (slug, speciesSlug, status, cover URL/key, CTA) is derived/owned by the engine or the
+// human, never by the writer — but coverImagePrompt IS engine-authored, so it flows through.
 export interface BlogpostAuthorPayload {
   titleEs: string;
   titleEn: string | null;

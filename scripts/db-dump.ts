@@ -76,7 +76,7 @@ async function main(): Promise<void> {
   } else {
     console.log(
       `This species has NO blogpost yet. Author ${species.slug}.blogpost.draft.json from scratch ` +
-        '(the editorial-writer\'s six-key JSON), then `db:insert -- --record … --blogpost …`.',
+        '(the editorial-writer\'s seven-key JSON), then `db:insert -- --record … --blogpost …`.',
     );
   }
 }
