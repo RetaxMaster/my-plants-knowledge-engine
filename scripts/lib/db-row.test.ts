@@ -41,7 +41,7 @@ const fullPayload: BlogpostAuthorPayload = {
 };
 
 describe('buildBlogpostRow', () => {
-  it('derives slug === speciesSlug === toSpeciesSlug, status DRAFT (0), carries the six author fields', () => {
+  it('derives slug === speciesSlug === toSpeciesSlug, status DRAFT (0), carries the seven author fields', () => {
     const result = buildBlogpostRow(record, fullPayload);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -53,6 +53,7 @@ describe('buildBlogpostRow', () => {
     expect(result.row.excerptEs).toBe(fullPayload.excerptEs);
     expect(result.row.bodyEs).toBe(fullPayload.bodyEs);
     expect(result.row.bodyEn).toBe(fullPayload.bodyEn);
+    expect(result.row.coverImagePrompt).toBe(fullPayload.coverImagePrompt);
   });
 
   it('passes null English fields through unchanged (ES-only post)', () => {

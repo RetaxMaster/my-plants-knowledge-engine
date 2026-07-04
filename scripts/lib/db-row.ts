@@ -55,7 +55,7 @@ export type BuildBlogpostRowResult =
   | { ok: true; row: BlogpostRow }
   | { ok: false; issues: string[] };
 
-// Assemble THEN validate (order matters — Spec 2 §4). The raw six-field author payload does NOT satisfy
+// Assemble THEN validate (order matters — Spec 2 §4). The raw seven-field author payload does NOT satisfy
 // blogpostInputSchema (which requires `slug`), so we first MERGE the author payload with the fields the
 // engine derives — `slug === speciesSlug` from the record, DRAFT status, and null media/CTA (the human
 // sets those later in the writing desk) — and only THEN validate the assembled object with the shared

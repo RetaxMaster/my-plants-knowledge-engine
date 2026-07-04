@@ -3,9 +3,10 @@ import { join } from 'node:path';
 // Pure transform: turn ONE stored species (record + its optional blogpost) into the exact draft files a
 // curator edits. Keeping it pure (no DB, no fs) makes the read step of a targeted edit unit-testable and
 // guarantees a faithful round-trip: the record re-serialized as pretty JSON, and — when a blogpost exists
-// — the blogpost's six authored fields as pretty JSON that re-parses straight into `db:insert`'s author
-// payload. A species with NO blogpost dumps ONLY the record (never an empty blogpost draft that would fail
-// re-insert). Under the same slug-based draft names the rest of the onboarding/edit flow already uses.
+// — the blogpost's seven authored fields (incl. coverImagePrompt) as pretty JSON that re-parses straight
+// into `db:insert`'s author payload. A species with NO blogpost dumps ONLY the record (never an empty
+// blogpost draft that would fail re-insert). Under the same slug-based draft names the rest of the
+// onboarding/edit flow already uses.
 
 export interface StoredBlogpost {
   titleEs: string;
@@ -37,9 +38,9 @@ export function buildDumpFiles(row: StoredSpeciesRow, outDir = '.'): DraftFile[]
   ];
 
   if (row.blogpost) {
-    // Faithful round-trip of the six authored fields. Nullable English fields serialize as JSON `null`
-    // (NEVER ""), so the file re-parses into the author payload without tripping the schema's
-    // min(1)-when-present rule on re-insert.
+    // Faithful round-trip of the seven authored fields (incl. coverImagePrompt). Nullable fields
+    // serialize as JSON `null` (NEVER ""), so the file re-parses into the author payload without
+    // tripping the schema's min(1)-when-present rule on re-insert.
     const bp = row.blogpost;
     const payload = {
       titleEs: bp.titleEs,
