@@ -65,7 +65,7 @@ async function main(): Promise<void> {
   const bp = blogpost.row;
 
   // 4) Persist BOTH in one transaction on one connection. NOW(3) for updated_at is inline in the SQL,
-  //    so the bindings are exactly the 9 value columns.
+  //    so the bindings are exactly the 10 value columns.
   const conn = await connectToDb();
   try {
     await conn.beginTransaction();
@@ -84,6 +84,7 @@ async function main(): Promise<void> {
       bp.excerptEn,
       bp.bodyEs,
       bp.bodyEn,
+      bp.coverImagePrompt,
     ]);
     await conn.commit();
   } catch (err) {
