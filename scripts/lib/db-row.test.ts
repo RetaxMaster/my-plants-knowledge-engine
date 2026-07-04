@@ -37,6 +37,7 @@ const fullPayload: BlogpostAuthorPayload = {
   excerptEn: 'A short, warm guide.',
   bodyEs: '# Helecho\nContenido en español.',
   bodyEn: '# Fern\nContent in English.',
+  coverImagePrompt: 'Macro of a Boston fern frond, 16:9, soft window light.',
 };
 
 describe('buildBlogpostRow', () => {
@@ -90,5 +91,28 @@ describe('buildBlogpostRow', () => {
     expect(result.row).not.toHaveProperty('coverImageUrl');
     expect(result.row).not.toHaveProperty('youtubeUrl');
     expect(result.row).not.toHaveProperty('ctaLink');
+    expect(result.row).toHaveProperty('coverImagePrompt'); // engine-authored, NOT nulled
+  });
+
+  it('carries coverImagePrompt through the assembled + validated row', () => {
+    const result = buildBlogpostRow(record, fullPayload);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.row.coverImagePrompt).toBe(fullPayload.coverImagePrompt);
+  });
+
+  it('passes a null coverImagePrompt through unchanged', () => {
+    const result = buildBlogpostRow(record, { ...fullPayload, coverImagePrompt: null });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.row.coverImagePrompt).toBeNull();
+  });
+
+  it('defaults coverImagePrompt to null when the payload omits it', () => {
+    const { coverImagePrompt: _drop, ...noPrompt } = fullPayload;
+    const result = buildBlogpostRow(record, noPrompt);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.row.coverImagePrompt).toBeNull();
   });
 });

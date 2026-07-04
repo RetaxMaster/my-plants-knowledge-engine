@@ -31,6 +31,7 @@ export interface BlogpostAuthorPayload {
   excerptEn: string | null;
   bodyEs: string;
   bodyEn: string | null;
+  coverImagePrompt: string | null;
 }
 
 // The `blogposts` table row the engine upserts — only the columns the engine OWNS. status/cover_*/
@@ -46,6 +47,7 @@ export interface BlogpostRow {
   excerptEn: string | null;
   bodyEs: string;
   bodyEn: string | null;
+  coverImagePrompt: string | null;
 }
 
 export type BuildBlogpostRowResult =
@@ -97,6 +99,7 @@ export function buildBlogpostRow(
       excerptEn: b.excerptEn,
       bodyEs: b.bodyEs,
       bodyEn: b.bodyEn,
+      coverImagePrompt: b.coverImagePrompt,
     },
   };
 }
