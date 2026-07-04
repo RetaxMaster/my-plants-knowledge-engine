@@ -61,22 +61,28 @@ brief, and never writes files or touches the DB.
 
 Invoke the `editorial-writer` subagent (you, the operator, invoke it — a subagent cannot invoke
 another subagent). Pass it the researcher's **raw English brief** and the **draft record** (its
-factual anchor). It returns **exactly ONE fenced JSON object with six keys** — `titleEs/titleEn`,
-`excerptEs/excerptEn`, `bodyEs/bodyEn` — a structured blogpost per language in one consistent house
-voice, with nothing before or after the block so you can save it verbatim. Spanish is required; the
-English keys are JSON `null` when no English version is produced. The editorial-writer never adds facts;
-if it asks for a fact not present, the gap is in the researcher's brief — go back to Step 2, do not
-invent it. Each body ends with a hyperlinked further-reading section (`## Want to dig deeper?` /
-`## Por si quieres profundizar más`) built only from the source links it was given, and carries
-`> 📸 Image idea:` blockquote notes marking where the operator should later place real images. `bodyEs`
-also **begins with a cover-image prompt block** wrapped in the shared `<!-- THUMBNAIL-PROMPT …
-THUMBNAIL-PROMPT -->` delimiters — a detailed prompt the human uses to generate the cover, then deletes
-before publishing. The editorial-writer never fetches or embeds images itself.
+factual anchor). It returns **exactly ONE fenced JSON object with seven keys** — `titleEs/titleEn`,
+`excerptEs/excerptEn`, `bodyEs/bodyEn`, and `coverImagePrompt` — a structured blogpost per language in
+one consistent house voice PLUS a language-neutral cover-image (OG) prompt, with nothing before or after
+the block so you can save it verbatim. Spanish is required; the English keys are JSON `null` when no
+English version is produced. The editorial-writer never adds facts; if it asks for a fact not present,
+the gap is in the researcher's brief — go back to Step 2, do not invent it. Each body ends with a
+hyperlinked further-reading section (`## Want to dig deeper?` / `## Por si quieres profundizar más`)
+built only from the source links it was given, and carries `> 📸 Image idea:` blockquote notes marking
+where the operator should later place real images. The `coverImagePrompt` key is the detailed
+cover-image prompt (its own field — NOT embedded in any body); `bodyEs` now starts with the article's
+first real content. The inline `> 📸 Image idea:` notes stay as in-body art direction. The
+editorial-writer never fetches or embeds images itself.
+
+**Division of roles (the invariant):** you (the orchestrator) only know you have a save tool
+(`db:insert`) that needs a title, an excerpt, the cover-image (OG) prompt, and the Markdown body — you
+author NONE of them. The `editorial-writer` is the sole source of all four, hands them back in its
+seven-key JSON, and you call the tool. You own the tools; the writer owns the content.
 
 ## Step 3 — Validate, persist, clean up
 
 1. Write the returned drafts to temp files: `<slug>.draft.json` (the record) and
-   `<slug>.blogpost.draft.json` (the editorial-writer's six-key JSON, saved verbatim — the surrounding
+   `<slug>.blogpost.draft.json` (the editorial-writer's **seven-key** JSON, saved verbatim — the surrounding
    ` ```json ` fence is fine: `db:insert` strips an optional outer code fence before parsing, and inner
    ` ``` ` code fences inside the body Markdown are preserved). Both match `.gitignore` and are never
    committed.
@@ -97,7 +103,8 @@ before publishing. The editorial-writer never fetches or embeds images itself.
 
 **The engine only ever creates a DRAFT species guide.** The engine never publishes (`status` starts at
 0 and stays 0 until a human acts). A human later reviews the draft in the web writing desk, generates
-the cover from the `<!-- THUMBNAIL-PROMPT … -->` prompt, deletes that block, and publishes.
+the cover from the `coverImagePrompt` (shown read-only in the writing desk) and publishes — there is no
+in-body block to delete anymore.
 
 ## Editing existing curated data (targeted curator edits)
 
@@ -108,7 +115,8 @@ touch the DB by hand; you go through the deterministic scripts and you change **
 1. **Resolve & pull.** Resolve the target to a slug, then `npm run db:dump -- --name "<scientific
    name>"` (or `--slug <slug>`) — it writes the stored `record` to `<slug>.draft.json` and, when a
    blogpost exists, the stored post to `<slug>.blogpost.draft.json`. (If the species has no blogpost
-   yet, only the record is dumped; author `<slug>.blogpost.draft.json` from scratch.) Keep an untouched
+   yet, only the record is dumped; author `<slug>.blogpost.draft.json` from scratch — the writer's
+   **seven-key** JSON, including `coverImagePrompt`.) Keep an untouched
    copy of each file you'll change (e.g. `cp <slug>.blogpost.draft.json <slug>.blogpost.draft.json.orig`)
    so you can diff it later. The drafts are ephemeral (gitignored) — delete them when done.
 
@@ -120,9 +128,9 @@ touch the DB by hand; you go through the deterministic scripts and you change **
    - **Trivial prose** (a typo, a link, an image note): edit the blogpost draft JSON directly (the
      relevant `titleEs/En`, `excerptEs/En`, or `bodyEs/En` value).
    - **Non-trivial prose** (rewriting a paragraph/section): hand the current blogpost (the dumped
-     six-key JSON) and the scoped change to the `editorial-writer` in **edit mode**; it returns the full
-     updated six-key JSON with the house voice and EN/ES parity preserved. Any factual change must land
-     in BOTH languages.
+     **seven-key** JSON) and the scoped change to the `editorial-writer` in **edit mode**; it returns the
+     full updated **seven-key** JSON with the house voice and EN/ES parity preserved. Any factual change
+     must land in BOTH languages.
 
 3. **Re-validate if the record changed.** `npm run validate -- --record <slug>.draft.json`. If the
    user's value breaks a schema invariant (e.g. `idealMinC ≤ idealMaxC`, `minimum ≤ ideal ≤ maximum`),
