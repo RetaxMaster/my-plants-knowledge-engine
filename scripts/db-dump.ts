@@ -40,7 +40,7 @@ async function main(): Promise<void> {
   }
   const species = speciesRows[0];
   const [blogRows] = await conn.execute<RowDataPacket[]>(
-    'SELECT `title_es`, `title_en`, `excerpt_es`, `excerpt_en`, `body_es`, `body_en` ' +
+    'SELECT `title_es`, `title_en`, `excerpt_es`, `excerpt_en`, `body_es`, `body_en`, `cover_image_prompt` ' +
       'FROM `blogposts` WHERE `species_slug` = ? LIMIT 1',
     [slug],
   );
@@ -56,6 +56,7 @@ async function main(): Promise<void> {
           excerptEn: blogRows[0].excerpt_en,
           bodyEs: blogRows[0].body_es,
           bodyEn: blogRows[0].body_en,
+          coverImagePrompt: blogRows[0].cover_image_prompt,
         };
 
   const files = buildDumpFiles(

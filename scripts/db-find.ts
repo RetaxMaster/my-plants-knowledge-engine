@@ -29,7 +29,7 @@ async function main(): Promise<void> {
   }
   const species = speciesRows[0];
   const [blogRows] = await conn.execute<RowDataPacket[]>(
-    'SELECT `status`, `title_es`, `title_en`, `excerpt_es`, `excerpt_en`, `body_es`, `body_en` ' +
+    'SELECT `status`, `title_es`, `title_en`, `excerpt_es`, `excerpt_en`, `body_es`, `body_en`, `cover_image_prompt` ' +
       'FROM `blogposts` WHERE `species_slug` = ? LIMIT 1',
     [slug],
   );
@@ -59,6 +59,8 @@ async function main(): Promise<void> {
   console.log(bp.excerpt_es);
   console.log('# EXCERPT (EN)');
   console.log(bp.excerpt_en ?? '(none)');
+  console.log('# COVER IMAGE PROMPT');
+  console.log(bp.cover_image_prompt ?? '(none)');
   console.log('# BODY (ES, Markdown)');
   console.log(bp.body_es);
   console.log('# BODY (EN, Markdown)');
