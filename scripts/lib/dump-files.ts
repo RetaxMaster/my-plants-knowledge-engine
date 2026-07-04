@@ -14,6 +14,7 @@ export interface StoredBlogpost {
   excerptEn: string | null;
   bodyEs: string;
   bodyEn: string | null;
+  coverImagePrompt: string | null;
 }
 
 export interface StoredSpeciesRow {
@@ -47,6 +48,7 @@ export function buildDumpFiles(row: StoredSpeciesRow, outDir = '.'): DraftFile[]
       excerptEn: bp.excerptEn ?? null,
       bodyEs: bp.bodyEs,
       bodyEn: bp.bodyEn ?? null,
+      coverImagePrompt: bp.coverImagePrompt ?? null,
     };
     files.push({
       path: join(outDir, `${row.slug}.blogpost.draft.json`),

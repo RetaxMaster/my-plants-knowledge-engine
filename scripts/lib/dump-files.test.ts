@@ -8,6 +8,7 @@ const blogpost = {
   excerptEn: 'Fenestrated leaves and an easygoing nature.',
   bodyEs: '# Costilla de Adán\nContenido.',
   bodyEn: '# Swiss cheese plant\nContent.',
+  coverImagePrompt: 'Macro Monstera leaf, 16:9, soft morning light.',
 };
 
 const baseRow: StoredSpeciesRow = {
@@ -37,11 +38,21 @@ describe('buildDumpFiles', () => {
     expect(JSON.parse(files[0].content).scientificName).toBe('Monstera deliciosa');
   });
 
-  it('round-trips the blogpost draft: exact six fields, re-parseable into db:insert', () => {
+  it('round-trips the blogpost draft: exact seven fields, re-parseable into db:insert', () => {
     const files = buildDumpFiles(baseRow);
     const parsed = JSON.parse(files[1].content);
     expect(parsed).toEqual(blogpost);
     expect(files[1].content.endsWith('\n')).toBe(true);
+  });
+
+  it('dumps coverImagePrompt as JSON null when the stored value is null (never omitted, never "")', () => {
+    const files = buildDumpFiles({
+      ...baseRow,
+      blogpost: { ...blogpost, coverImagePrompt: null },
+    });
+    const parsed = JSON.parse(files[1].content);
+    expect(parsed).toHaveProperty('coverImagePrompt');
+    expect(parsed.coverImagePrompt).toBeNull();
   });
 
   it('dumps NULL English fields as JSON null — NEVER an empty string (would fail min(1)-when-present on re-insert)', () => {
