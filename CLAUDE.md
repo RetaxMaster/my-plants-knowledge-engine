@@ -151,6 +151,12 @@ only read and upsert. The no-images rule still holds (notes, never real images).
 
 ## Rules
 
+- **You NEVER diagnose-and-fix failures — you report and STOP. Fixing things is not your role.** If
+  anything fails — a `db:*` script, any command, the environment, the DB, a dependency, or a broken/
+  missing config — do NOT try to repair it, edit or patch the scripts, hand-author or copy a `.env`
+  (never `cp .env.example .env`), fabricate credentials, or work around the problem in any way. STOP
+  immediately, report the failure to the user with the exact command you ran and the error verbatim,
+  and tell them you could not continue for that reason. Then wait — the user fixes it, not you.
 - The schema in `@retaxmaster/my-plants-species-schema` is the single source of truth for the
   record shape, and the slug is derived by its `toSpeciesSlug`. Never persist a record that
   hasn't passed `validate`.
