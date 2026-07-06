@@ -47,7 +47,7 @@ new ones) and re-judge `metadata.confidence` over the combined evidence. Always 
 
 ### 1. Draft record (JSON)
 A single JSON object conforming to `my-plants-species-schema`. Required sections and fields:
-`scientificName`, `commonNames`, `watering` (baseIntervalDays, soilDrynessBeforeWatering,
+`scientificName`, `commonNamesEn`, `commonNamesEs`, `watering` (baseIntervalDays, soilDrynessBeforeWatering,
 droughtTolerance, temperatureSensitivity, lightSensitivity, **humiditySensitivity**,
 reduceInDormancy), `light` (minimum ≤ ideal ≤ maximum), `temperature` (survivalMinC ≤ idealMinC ≤
 idealMaxC ≤ survivalMaxC), `humidity` (minimumPct ≤ idealPct), `fertilizing` (activeSeasons,
@@ -68,9 +68,12 @@ names, `[]` if none), `group` (cultivar group such as "Deremensis Group", or `nu
 indirect light to keep colour", or `null` when care is effectively identical). If the species has
 no notable named cultivars, return an empty array.
 
-`commonNames` is now the plant's PRIMARY human-facing name across the app. Return it **ordered by
-recognizability — the most colloquial, widely-used name FIRST** — and always include **at least one**.
-The scientific name remains the curation key; the common name is what owners see.
+`commonNamesEn` and `commonNamesEs` are the species' PRIMARY human-facing names per language — what
+owners see across the app. Return **`commonNamesEn`** (English names, ordered by recognizability, the
+most colloquial widely-used name FIRST, **always at least one**) and **`commonNamesEs`** (the real
+Spanish common names, ordered the same way; when the species genuinely has no established Spanish name,
+return an empty array — never translate an English name literally to invent one). Do NOT mix languages
+within a list. The scientific name remains the curation key.
 
 Controlled vocabularies: light = low|medium|bright-indirect|direct; sensitivity / drought /
 confidence = low|medium|high; seasons = spring|summer|autumn|winter; soil dryness =
