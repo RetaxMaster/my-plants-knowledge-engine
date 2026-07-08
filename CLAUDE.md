@@ -98,6 +98,15 @@ seven-key JSON, and you call the tool. You own the tools; the writer owns the co
    `slug === speciesSlug`). Re-running enriches the engine-owned text (title/excerpt/body) but **never**
    clobbers a human's `status`, cover, YouTube, CTA, or `published_at`. The `blogposts`/`species` tables
    are created by `my-plants-api`'s migration, which must have run first. Never write rows by hand.
+
+   **Draft-on-edit invariant (enrichment of an existing post) — enforced automatically.** An engine edit
+   must never silently change what the public sees. `db:insert` enforces this deterministically: before
+   the upsert it reads the existing row's status, and if the post is currently **published** it forces it
+   back to **DRAFT** — you pass no flag and cannot forget it. A fresh insert or an already-draft post is
+   unaffected. **Still VERIFY the real stored status with
+   `npm run db:find -- --name "<scientific name>"` (it prints `DRAFT (0)` / `PUBLISHED (1)`) — never trust
+   `db:insert`'s own success line, which does not read the row back.** Invariant: an enriched,
+   previously-published post ends as DRAFT.
 4. **Delete the temp drafts** and report: slug, `metadata.confidence`, source count, and whether it was
    a fresh insert or an enrichment.
 
@@ -141,9 +150,12 @@ touch the DB by hand; you go through the deterministic scripts and you change **
    whole row.
 
 5. **Persist & clean up.** `set -a; source .env; set +a && npm run db:insert -- --record
-   <slug>.draft.json --blogpost <slug>.blogpost.draft.json` upserts the updated record + blogpost (the
-   non-clobbering upsert preserves the human's status/cover/CTA). Delete the drafts (and `.orig` copies)
-   and report what changed.
+   <slug>.draft.json --blogpost <slug>.blogpost.draft.json` upserts the updated record + blogpost. The
+   non-clobbering upsert preserves the human's cover/CTA, and — **automatically** — if the post you edited
+   is currently published, `db:insert` forces it back to DRAFT for human re-review (an engine edit must
+   never silently change published content; no flag, nothing to remember). **Then confirm the actual
+   stored status with `npm run db:find` — never trust `db:insert`'s success line.** Delete the drafts (and
+   `.orig` copies) and report what changed.
 
 **The user is the curator: their requested fact wins.** Apply the value they ask for as given; do not
 re-research it or change other fields on your own. Deleting a species is out of scope — these scripts
