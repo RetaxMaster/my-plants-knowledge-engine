@@ -3,7 +3,8 @@ import { validateRecord } from './validate.js';
 
 const valid = {
   scientificName: 'Monstera deliciosa',
-  commonNames: ['Swiss cheese plant'],
+  commonNamesEn: ['Swiss cheese plant'],
+  commonNamesEs: ['Costilla de Adán'],
   watering: {
     baseIntervalDays: 7,
     soilDrynessBeforeWatering: 'half-dry',

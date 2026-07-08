@@ -13,7 +13,7 @@ const blogpost = {
 
 const baseRow: StoredSpeciesRow = {
   slug: 'monstera-deliciosa',
-  record: { scientificName: 'Monstera deliciosa', commonNames: ['Swiss cheese plant'] },
+  record: { scientificName: 'Monstera deliciosa', commonNamesEn: ['Swiss cheese plant'], commonNamesEs: ['Costilla de Adán'] },
   blogpost,
 };
 
@@ -30,7 +30,7 @@ describe('buildDumpFiles', () => {
     const [recordFile] = buildDumpFiles(baseRow);
     expect(recordFile.content.endsWith('\n')).toBe(true);
     expect(recordFile.content).toContain('\n  "scientificName": "Monstera deliciosa"');
-    expect(JSON.parse(recordFile.content).commonNames[0]).toBe('Swiss cheese plant');
+    expect(JSON.parse(recordFile.content).commonNamesEn[0]).toBe('Swiss cheese plant');
   });
 
   it('parses a record handed back as a raw JSON string (mysql2 may not pre-parse it)', () => {
