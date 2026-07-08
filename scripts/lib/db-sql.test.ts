@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { SPECIES_UPSERT_SQL, BLOGPOST_UPSERT_SQL } from './db-sql.js';
+import {
+  SPECIES_UPSERT_SQL,
+  BLOGPOST_UPSERT_SQL,
+  BLOGPOST_UPSERT_AS_DRAFT_SQL,
+  selectBlogpostUpsertSql,
+} from './db-sql.js';
 
 describe('SPECIES_UPSERT_SQL', () => {
   it('upserts only slug/scientific_name/record — the dropped brief columns are gone', () => {
@@ -86,5 +91,60 @@ describe('BLOGPOST_UPSERT_SQL', () => {
     const colList = insertHead.split(/VALUES/i)[0];
     expect(colList.indexOf('`body_en`')).toBeLessThan(colList.indexOf('`cover_image_prompt`'));
     expect(colList.indexOf('`cover_image_prompt`')).toBeLessThan(colList.indexOf('`updated_at`'));
+  });
+});
+
+describe('BLOGPOST_UPSERT_AS_DRAFT_SQL (D1 — return a currently-PUBLISHED post to DRAFT)', () => {
+  const draftUpdateClause =
+    BLOGPOST_UPSERT_AS_DRAFT_SQL.split('ON DUPLICATE KEY UPDATE')[1] ?? '';
+  const defaultInsertHead = BLOGPOST_UPSERT_SQL.split('ON DUPLICATE KEY UPDATE')[0];
+  const draftInsertHead = BLOGPOST_UPSERT_AS_DRAFT_SQL.split('ON DUPLICATE KEY UPDATE')[0];
+
+  it('resets status back to DRAFT (0) on update — a previously-PUBLISHED row ends DRAFT', () => {
+    expect(draftUpdateClause).toContain('`status` = 0');
+  });
+
+  it('leaves the INSERT half byte-identical to the default (a FRESH post is unaffected)', () => {
+    expect(draftInsertHead).toBe(defaultInsertHead);
+  });
+
+  it('still refreshes the seven engine-owned text columns like the default upsert', () => {
+    for (const col of [
+      'title_es',
+      'title_en',
+      'excerpt_es',
+      'excerpt_en',
+      'body_es',
+      'body_en',
+      'cover_image_prompt',
+    ]) {
+      expect(draftUpdateClause).toContain(`\`${col}\``);
+    }
+  });
+
+  it('adds ONLY status vs the default — never touches other human-owned columns', () => {
+    for (const col of [
+      'species_slug',
+      'cover_image_url',
+      'cover_image_object_key',
+      'youtube_url',
+      'cta_link',
+      'cta_label_es',
+      'cta_label_en',
+      'published_at',
+      'created_at',
+    ]) {
+      expect(draftUpdateClause).not.toContain(`\`${col}\``);
+    }
+  });
+});
+
+describe('selectBlogpostUpsertSql (D1 — the existing row status decides the statement)', () => {
+  it('returns the DRAFT-forcing SQL when the existing row is currently PUBLISHED', () => {
+    expect(selectBlogpostUpsertSql(true)).toBe(BLOGPOST_UPSERT_AS_DRAFT_SQL);
+  });
+
+  it('returns the non-clobbering default (status preserved) for a new or already-DRAFT row', () => {
+    expect(selectBlogpostUpsertSql(false)).toBe(BLOGPOST_UPSERT_SQL);
   });
 });

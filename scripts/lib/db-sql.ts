@@ -29,3 +29,22 @@ export const BLOGPOST_UPSERT_SQL =
   '`body_es` = VALUES(`body_es`), `body_en` = VALUES(`body_en`), ' +
   '`cover_image_prompt` = VALUES(`cover_image_prompt`), ' +
   '`updated_at` = NOW(3)';
+
+// D1 — the DRAFT-forcing sibling of BLOGPOST_UPSERT_SQL. Byte-identical statement EXCEPT the
+// ON DUPLICATE KEY UPDATE clause ALSO sets `status` = 0 (0 === BlogpostStatus.DRAFT). Emitted ONLY when
+// db-insert.ts has detected that the existing row is currently PUBLISHED: an engine edit to already-public
+// content must return to DRAFT for human re-review, enforced deterministically in SQL rather than left to
+// an operator instruction (the instruction was the thing that got ignored in the 2026-07-08 incident). The
+// INSERT half is unchanged, so a FRESH post is unaffected — the update clause only fires on an existing
+// row. Everything else the non-clobbering default protects (cover, CTA, published_at, …) is still
+// untouched here.
+export const BLOGPOST_UPSERT_AS_DRAFT_SQL = BLOGPOST_UPSERT_SQL + ', `status` = 0';
+
+// Pick the blogpost upsert statement for db:insert based on the CURRENT stored status: the DRAFT-forcing
+// variant when the existing row is currently PUBLISHED (an edit/enrich must return it to DRAFT), otherwise
+// the non-clobbering default (which preserves the human's status; correct for a fresh insert or an
+// already-draft re-run). Kept as a pure function so the status → SQL decision is unit-testable without a
+// live DB; db-insert.ts supplies the boolean from a single pre-upsert SELECT.
+export function selectBlogpostUpsertSql(isCurrentlyPublished: boolean): string {
+  return isCurrentlyPublished ? BLOGPOST_UPSERT_AS_DRAFT_SQL : BLOGPOST_UPSERT_SQL;
+}
