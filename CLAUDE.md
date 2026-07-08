@@ -48,6 +48,9 @@ brief, and never writes files or touches the DB.
   English body, `bodyEn`, from `db:find`/`db:dump`) as the baseline, so it UPDATES/enriches them
   instead of starting blank. It returns the complete improved record + improved raw English brief
   (not a diff).
+  Keep the existing stored blogpost (its `bodyEs`/`bodyEn` with any human-placed images and prose) —
+  you will hand it to the `editorial-writer` in Step 2.5 as the baseline to AUGMENT, so the enrich never
+  regenerates the post from scratch and never loses the human's images or prose.
 - **Cultivars (both modes):** the research MUST find all the well-known named varieties
   (cultivars) of the species and fill the record's `cultivars` field — they are informational
   only (identity/appearance, never care overrides), and the same varieties must be summarised in
@@ -61,7 +64,12 @@ brief, and never writes files or touches the DB.
 
 Invoke the `editorial-writer` subagent (you, the operator, invoke it — a subagent cannot invoke
 another subagent). Pass it the researcher's **raw English brief** and the **draft record** (its
-factual anchor). It returns **exactly ONE fenced JSON object with seven keys** — `titleEs/titleEn`,
+factual anchor). **On an ENRICH pass, ALSO pass it the current stored blogpost — the seven-key JSON
+from `db:find`/`db:dump`, whose `bodyEs`/`bodyEn` hold the human's prose and already-placed images —
+and tell it this is an enrich: it must AUGMENT that body (fold in the new research, keep the existing
+prose, keep every already-placed image, add new `📸 Image idea` notes only alongside), never
+regenerate from scratch. Only on a FRESH pass (no stored post) does the writer author the body from the
+brief alone.** It returns **exactly ONE fenced JSON object with seven keys** — `titleEs/titleEn`,
 `excerptEs/excerptEn`, `bodyEs/bodyEn`, and `coverImagePrompt` — a structured blogpost per language in
 one consistent house voice PLUS a language-neutral cover-image (OG) prompt, with nothing before or after
 the block so you can save it verbatim. Spanish is required; the English keys are JSON `null` when no
@@ -78,6 +86,10 @@ editorial-writer never fetches or embeds images itself.
 (`db:insert`) that needs a title, an excerpt, the cover-image (OG) prompt, and the Markdown body — you
 author NONE of them. The `editorial-writer` is the sole source of all four, hands them back in its
 seven-key JSON, and you call the tool. You own the tools; the writer owns the content.
+
+**Enriching a published post?** The additive rule above keeps its content; the **draft-on-edit** rule
+(Step 3) keeps its *review status* honest — `db:insert` automatically returns a previously-published post
+to DRAFT on this enrich (no flag needed), and you then verify with `db:find`.
 
 ## Step 3 — Validate, persist, clean up
 
