@@ -3,7 +3,9 @@ import { parseArgs } from 'node:util';
 import { buildSpeciesRow, buildBlogpostRow } from './lib/db-row.js';
 import { validateRecord } from './lib/validate.js';
 import { connectToDb } from './lib/db.js';
-import { SPECIES_UPSERT_SQL, BLOGPOST_UPSERT_SQL } from './lib/db-sql.js';
+import { type RowDataPacket } from 'mysql2/promise';
+import { BlogpostStatus } from '@retaxmaster/my-plants-species-schema';
+import { SPECIES_UPSERT_SQL, selectBlogpostUpsertSql } from './lib/db-sql.js';
 import { parseBlogpostPayload } from './lib/parse-payload.js';
 
 // Persist ONE curated species into the API-owned DB: the `species` record row AND its related
@@ -66,15 +68,30 @@ async function main(): Promise<void> {
 
   // 4) Persist BOTH in one transaction on one connection. NOW(3) for updated_at is inline in the SQL,
   //    so the bindings are exactly the 10 value columns.
+  // D1 auto-detect (forget-proof; no operator flag): decide DRAFT-vs-preserve from the CURRENT stored
+  // status, read inside the transaction just before the upsert. Declared out here so the success log can
+  // report honestly what happened.
+  let wasPublished = false;
   const conn = await connectToDb();
   try {
     await conn.beginTransaction();
+
+    // If a row with this slug exists AND is currently PUBLISHED, the write must force it back to DRAFT — an
+    // engine edit to already-public content returns to human re-review. A new slug (fresh insert) or an
+    // already-DRAFT row is unaffected (selectBlogpostUpsertSql(false) === the non-clobbering default).
+    const [existing] = await conn.execute<RowDataPacket[]>(
+      'SELECT `status` FROM `blogposts` WHERE `slug` = ? LIMIT 1',
+      [bp.slug],
+    );
+    wasPublished =
+      existing.length > 0 && existing[0].status === BlogpostStatus.PUBLISHED;
+
     await conn.execute(SPECIES_UPSERT_SQL, [
       speciesRow.slug,
       speciesRow.scientificName,
       speciesRow.recordJson,
     ]);
-    await conn.execute(BLOGPOST_UPSERT_SQL, [
+    await conn.execute(selectBlogpostUpsertSql(wasPublished), [
       bp.slug,
       bp.speciesSlug,
       bp.status,
@@ -95,8 +112,14 @@ async function main(): Promise<void> {
   }
 
   console.log(
-    `✓ Upserted ${speciesRow.slug} (species record + DRAFT blogpost) into the DB. ` +
-      'The blogpost is a DRAFT (status = 0); a human reviews and publishes it in the web writing desk.',
+    wasPublished
+      ? `✓ Upserted ${speciesRow.slug} (species record + blogpost) into the DB. ` +
+          'The blogpost was PUBLISHED and was forced back to DRAFT (status = 0) for human re-review. ' +
+          'Confirm the ACTUAL stored status with `npm run db:find` — do not trust this line.'
+      : `✓ Upserted ${speciesRow.slug} (species record + blogpost) into the DB. ` +
+          'A first insert is a DRAFT (status = 0); an existing DRAFT stays a draft and its status is ' +
+          'preserved (no publish/unpublish). Confirm the ACTUAL stored status with `npm run db:find` — ' +
+          'do not trust this line.',
   );
 }
 
