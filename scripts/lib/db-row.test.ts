@@ -4,7 +4,8 @@ import { buildSpeciesRow, buildBlogpostRow, type BlogpostAuthorPayload } from '.
 
 const record = {
   scientificName: 'Nephrolepis exaltata',
-  commonNames: ['Boston fern'],
+  commonNamesEn: ['Boston fern'],
+  commonNamesEs: ['Helecho de Boston'],
   watering: { baseIntervalDays: 4, soilDrynessBeforeWatering: 'keep-moist', droughtTolerance: 'low', temperatureSensitivity: 'medium', lightSensitivity: 'medium', humiditySensitivity: 'high', reduceInDormancy: false },
   misting: { benefit: 'beneficial', baseFrequencyDays: 3, note: null },
   light: { minimum: 'medium', ideal: 'bright-indirect', maximum: 'bright-indirect' },
