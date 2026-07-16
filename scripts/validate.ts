@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
-import { validateRecord } from './lib/validate.js';
+import { validateCuration } from './lib/validate.js';
 
 async function main(): Promise<void> {
   const { values } = parseArgs({ options: { record: { type: 'string' } } });
@@ -16,9 +16,13 @@ async function main(): Promise<void> {
     console.error(`✗ ${values.record} is not valid JSON: ${(err as Error).message}`);
     process.exit(1);
   }
-  const result = validateRecord(parsed);
+  const result = validateCuration(parsed);
   if (result.ok) {
     console.log(`✓ Valid species record for ${result.record.scientificName}`);
+    if (result.record.growthHabit === 'other') {
+      const reason = (parsed as { growthHabitOtherReason?: unknown })?.growthHabitOtherReason;
+      console.log(`  growthHabit override accepted: ${reason}`);
+    }
     return;
   }
   console.error('✗ Invalid species record:');

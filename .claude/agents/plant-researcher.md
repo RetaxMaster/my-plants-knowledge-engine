@@ -54,7 +54,7 @@ idealMaxC ≤ survivalMaxC), `humidity` (minimumPct ≤ idealPct), `fertilizing`
 inSeasonFrequencyDays, reduceInDormancy), `repotting` (typicalIntervalMonths, signs),
 `maintenance` (pruning, rotationDays|null, leafCleaningDays|null, commonPests), `misting`
 (benefit, baseFrequencyDays, note), `nativeClimate` (description, koppen?, hardinessMinC ≤
-hardinessMaxC), `cultivars`, and `metadata` (confidence,
+hardinessMaxC), `cultivars`, `growthHabit`, and `metadata` (confidence,
 sources:[{title,url,accessedAt:"YYYY-MM-DD"}]).
 
 **`cultivars` — research ALL the well-known named varieties of the species.** A cultivar is a
@@ -77,8 +77,9 @@ within a list. The scientific name remains the curation key.
 
 Controlled vocabularies: light = low|medium|bright-indirect|direct; sensitivity / drought /
 confidence = low|medium|high; seasons = spring|summer|autumn|winter; soil dryness =
-keep-moist|top-inch-dry|half-dry|mostly-dry|fully-dry. Use Celsius and percentages. Never
-invent a source; only list sources you actually consulted.
+keep-moist|top-inch-dry|half-dry|mostly-dry|fully-dry; growth habit =
+upright|climber|trailing|clumping|rosette|tree|shrub|other (other REQUIRES a growthHabitOtherReason).
+Use Celsius and percentages. Never invent a source; only list sources you actually consulted.
 
 **`humiditySensitivity`** (low|medium|high) expresses how strongly *ambient humidity* should move
 this species' watering rhythm — high for thin-leaved tropicals that suffer in dry air (e.g. calatheas,
@@ -92,6 +93,18 @@ for cleaning); `avoid` for succulents, cacti, fuzzy/hairy-leaved plants, and tig
 where trapped water rots tissue; `tolerated` otherwise. When `benefit` is `beneficial` or `tolerated`,
 set `baseFrequencyDays` to a sensible cadence (e.g. 2–4 days for `beneficial`); when `avoid`, leave
 `baseFrequencyDays` null. Use `note` for nuance (e.g. "avoid wetting the crown") or null.
+
+**`growthHabit`** (upright|climber|trailing|clumping|rosette|tree|shrub|other) is the species' dominant
+mature growth form — how a grower would describe its shape (an upright dracaena, a trailing pothos, a
+rosette-forming echeveria, a climbing monstera). It is **display-only measurement guidance for the owner**,
+never a care value, so it does not affect the deterministic engine. Fill it on **every** fresh curation and
+on any enrich pass; do not leave it null — the validation gate requires a value. Use `other` ONLY when the
+form is genuinely mixed or unclear, and when you do you MUST also set **`growthHabitOtherReason`** — a short
+sentence explaining why no single habit fits. A bare `other` with no reason FAILS the validation gate.
+
+When `growthHabit` is `other`, the draft JSON also carries `growthHabitOtherReason` (a KE-curation field,
+not part of the shared species record). It records your justification and is persisted alongside the
+curated record.
 
 ### 2. Draft brief — ONE raw English brief
 A single English Markdown brief: an informative write-up for a curious owner covering origins,

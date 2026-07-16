@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { SpeciesRecord } from '@retaxmaster/my-plants-species-schema';
 import { buildSpeciesRow, buildBlogpostRow, type BlogpostAuthorPayload } from './db-row.js';
+import { validateRecord } from './validate.js';
 
 const record = {
   scientificName: 'Nephrolepis exaltata',
@@ -16,6 +17,7 @@ const record = {
   maintenance: { pruning: 'Trim dead fronds.', rotationDays: 14, leafCleaningDays: null, commonPests: [] },
   nativeClimate: { description: 'Humid tropical forests.', hardinessMinC: 7, hardinessMaxC: 32 },
   cultivars: [{ name: 'Bostoniensis', alsoKnownAs: [], group: null, description: 'Arching, finely divided fronds.', careNote: null }],
+  growthHabit: null,
   metadata: { confidence: 'high', sources: [{ title: 'RHS', url: 'https://www.rhs.org.uk/', accessedAt: '2026-06-18' }] },
 } satisfies SpeciesRecord;
 
@@ -28,6 +30,26 @@ describe('buildSpeciesRow', () => {
     // The brief columns are gone from the row (they were dropped by API migration 0009).
     expect(row).not.toHaveProperty('briefEn');
     expect(row).not.toHaveProperty('briefEs');
+  });
+});
+
+describe('buildSpeciesRow persists the growthHabit "other" reason (BLOCKER 8)', () => {
+  it('embeds growthHabitOtherReason in the persisted recordJson for an "other" curation', () => {
+    const draft = { ...record, growthHabit: 'other', growthHabitOtherReason: 'Mixed rosette-and-trailing form.' };
+    const parsed = validateRecord(draft); // strips the non-schema reason from parsed.record
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    const row = buildSpeciesRow(parsed.record, draft); // re-attaches it from the original draft
+    const persisted = JSON.parse(row.recordJson); // === the species.record column value
+    expect(persisted.curationMeta.growthHabitOtherReason).toBe('Mixed rosette-and-trailing form.');
+    expect(persisted.growthHabit).toBe('other');
+  });
+
+  it('adds no curationMeta for a real habit', () => {
+    const parsed = validateRecord({ ...record, growthHabit: 'trailing' });
+    if (!parsed.ok) throw new Error('fixture should parse');
+    const persisted = JSON.parse(buildSpeciesRow(parsed.record).recordJson);
+    expect(persisted.curationMeta).toBeUndefined();
   });
 });
 

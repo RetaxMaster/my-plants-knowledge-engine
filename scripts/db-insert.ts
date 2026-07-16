@@ -63,7 +63,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const speciesRow = buildSpeciesRow(validated.record);
+  const speciesRow = buildSpeciesRow(validated.record, draft);
   const bp = blogpost.row;
 
   // 4) Persist BOTH in one transaction on one connection. NOW(3) for updated_at is inline in the SQL,

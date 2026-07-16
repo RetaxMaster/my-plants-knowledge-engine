@@ -13,11 +13,21 @@ export interface SpeciesRow {
   recordJson: string;
 }
 
-export function buildSpeciesRow(record: SpeciesRecord): SpeciesRow {
+// growthHabit 'other' MUST persist WHY (BLOCKER 8 / spec §2.3). The shared schema has no reason field, so
+// store it as a namespaced audit key on the persisted record JSON — durable in the `species.record` column,
+// ignored by the API's schema parse. Read it from the ORIGINAL draft (validateRecord strips unknown keys).
+export function buildSpeciesRow(record: SpeciesRecord, draft?: unknown): SpeciesRow {
+  const stored: Record<string, unknown> = { ...record };
+  if (record.growthHabit === 'other') {
+    const reason = String(
+      (draft as { growthHabitOtherReason?: unknown } | undefined)?.growthHabitOtherReason ?? '',
+    ).trim();
+    if (reason) stored.curationMeta = { growthHabitOtherReason: reason };
+  }
   return {
     slug: toSpeciesSlug(record.scientificName),
     scientificName: record.scientificName,
-    recordJson: JSON.stringify(record),
+    recordJson: JSON.stringify(stored),
   };
 }
 
