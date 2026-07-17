@@ -1,10 +1,10 @@
 # MyPlants Knowledge Engine — Onboarding Workflow
 
-You are the operator. Given a plant name, you drive the `plant-researcher` subagent, the
-`editorial-writer` subagent, and the deterministic scripts to produce ONE validated curated species
+You are the operator. Given a plant name, you drive the `plant_researcher` subagent, the
+`editorial_writer` subagent, and the deterministic scripts to produce ONE validated curated species
 record plus its **structured blogpost** (title/excerpt/body **in both English and Spanish**), and
 persist them directly to the database — the blogpost as a **DRAFT** the human later publishes.
-Authoring is two-step: the `plant-researcher` writes ONE raw English brief, then the `editorial-writer`
+Authoring is two-step: the `plant_researcher` writes ONE raw English brief, then the `editorial_writer`
 turns that brief into the polished English and Spanish blogpost. The **database is the single source of
 truth**; the files Claude generates during research (`*.draft.json`, `*.blogpost.draft.json`) are
 ephemeral scratch that must not survive the session.
@@ -41,15 +41,17 @@ data and judge, critically, whether it is truly the same species.
 
 ## Step 2 — Research (fresh or enrich)
 
-Invoke the `plant-researcher` subagent. It returns a complete draft record + ONE raw English
+Invoke the `plant_researcher` subagent. It returns a complete draft record + ONE raw English
 brief, and never writes files or touches the DB.
+- **On Claude:** the `Task` tool with subagent `plant_researcher`.
+- **On Codex:** `spawn_agent(task_name="research_<slug>_r1", agent_type="plant_researcher", message="Research <scientific name>; return the draft record + one raw English brief.", fork_turns="none")` then `wait_agent(...)`.
 - **Fresh:** pass the resolved scientific name (and any trusted sources the user gave).
 - **Enrich:** also pass the existing record + the existing English guide (the stored blogpost's
   English body, `bodyEn`, from `db:find`/`db:dump`) as the baseline, so it UPDATES/enriches them
   instead of starting blank. It returns the complete improved record + improved raw English brief
   (not a diff).
   Keep the existing stored blogpost (its `bodyEs`/`bodyEn` with any human-placed images and prose) —
-  you will hand it to the `editorial-writer` in Step 2.5 as the baseline to AUGMENT, so the enrich never
+  you will hand it to the `editorial_writer` in Step 2.5 as the baseline to AUGMENT, so the enrich never
   regenerates the post from scratch and never loses the human's images or prose.
 - **Cultivars (both modes):** the research MUST find all the well-known named varieties
   (cultivars) of the species and fill the record's `cultivars` field — they are informational
@@ -62,9 +64,11 @@ brief, and never writes files or touches the DB.
 
 ## Step 2.5 — Editorialize (the house voice)
 
-Invoke the `editorial-writer` subagent (you, the operator, invoke it — a subagent cannot invoke
+Invoke the `editorial_writer` subagent (you, the operator, invoke it — a subagent cannot invoke
 another subagent). Pass it the researcher's **raw English brief** and the **draft record** (its
-factual anchor). **On an ENRICH pass, ALSO pass it the current stored blogpost — the seven-key JSON
+factual anchor).
+- **On Claude:** the `Task` tool with subagent `editorial_writer`.
+- **On Codex:** `spawn_agent(task_name="editorial_<slug>_r1", agent_type="editorial_writer", message="Turn this raw English brief + draft record into the seven-key blogpost JSON.", fork_turns="none")` then `wait_agent(...)`. **On an ENRICH pass, ALSO pass it the current stored blogpost — the seven-key JSON
 from `db:find`/`db:dump`, whose `bodyEs`/`bodyEn` hold the human's prose and already-placed images —
 and tell it this is an enrich: it must AUGMENT that body (fold in the new research, keep the existing
 prose, keep every already-placed image, add new `📸 Image idea` notes only alongside), never
@@ -73,18 +77,18 @@ brief alone.** It returns **exactly ONE fenced JSON object with seven keys** —
 `excerptEs/excerptEn`, `bodyEs/bodyEn`, and `coverImagePrompt` — a structured blogpost per language in
 one consistent house voice PLUS a language-neutral cover-image (OG) prompt, with nothing before or after
 the block so you can save it verbatim. Spanish is required; the English keys are JSON `null` when no
-English version is produced. The editorial-writer never adds facts; if it asks for a fact not present,
+English version is produced. The editorial_writer never adds facts; if it asks for a fact not present,
 the gap is in the researcher's brief — go back to Step 2, do not invent it. Each body ends with a
 hyperlinked further-reading section (`## Want to dig deeper?` / `## Por si quieres profundizar más`)
 built only from the source links it was given, and carries `> 📸 Image idea:` blockquote notes marking
 where the operator should later place real images. The `coverImagePrompt` key is the detailed
 cover-image prompt (its own field — NOT embedded in any body); `bodyEs` now starts with the article's
 first real content. The inline `> 📸 Image idea:` notes stay as in-body art direction. The
-editorial-writer never fetches or embeds images itself.
+editorial_writer never fetches or embeds images itself.
 
 **Division of roles (the invariant):** you (the orchestrator) only know you have a save tool
 (`db:insert`) that needs a title, an excerpt, the cover-image (OG) prompt, and the Markdown body — you
-author NONE of them. The `editorial-writer` is the sole source of all four, hands them back in its
+author NONE of them. The `editorial_writer` is the sole source of all four, hands them back in its
 seven-key JSON, and you call the tool. You own the tools; the writer owns the content.
 
 **Enriching a published post?** The additive rule above keeps its content; the **draft-on-edit** rule
@@ -94,7 +98,7 @@ to DRAFT on this enrich (no flag needed), and you then verify with `db:find`.
 ## Step 3 — Validate, persist, clean up
 
 1. Write the returned drafts to temp files: `<slug>.draft.json` (the record) and
-   `<slug>.blogpost.draft.json` (the editorial-writer's **seven-key** JSON, saved verbatim — the surrounding
+   `<slug>.blogpost.draft.json` (the editorial_writer's **seven-key** JSON, saved verbatim — the surrounding
    ` ```json ` fence is fine: `db:insert` strips an optional outer code fence before parsing, and inner
    ` ``` ` code fences inside the body Markdown are preserved). Both match `.gitignore` and are never
    committed.
@@ -145,11 +149,11 @@ touch the DB by hand; you go through the deterministic scripts and you change **
    byte-for-byte — never re-research, never rephrase untouched prose, never regenerate a whole post.
    - **Data field (record):** edit the JSON draft. Data and prose must agree, so if the changed value
      is also stated in the blogpost, you MUST update that mention in BOTH `bodyEs` and `bodyEn` (via the
-     `editorial-writer` in edit mode) so the post never contradicts the record.
+     `editorial_writer` in edit mode) so the post never contradicts the record.
    - **Trivial prose** (a typo, a link, an image note): edit the blogpost draft JSON directly (the
      relevant `titleEs/En`, `excerptEs/En`, or `bodyEs/En` value).
    - **Non-trivial prose** (rewriting a paragraph/section): hand the current blogpost (the dumped
-     **seven-key** JSON) and the scoped change to the `editorial-writer` in **edit mode**; it returns the
+     **seven-key** JSON) and the scoped change to the `editorial_writer` in **edit mode**; it returns the
      full updated **seven-key** JSON with the house voice and EN/ES parity preserved. Any factual change
      must land in BOTH languages.
 

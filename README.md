@@ -5,8 +5,8 @@ curated species record** plus a **structured blogpost** (title / excerpt / body,
 Spanish), and persists both directly to the MyPlants database.
 
 This is not a conventional service you "start". It is operated by an agent (Claude Code): the
-`CLAUDE.md` in this repo is the operator's playbook, driving a `plant-researcher` subagent, an
-`editorial-writer` subagent, and a set of deterministic scripts. The **database is the single
+`CLAUDE.md` in this repo is the operator's playbook, driving a `plant_researcher` subagent, an
+`editorial_writer` subagent, and a set of deterministic scripts. The **database is the single
 source of truth**; the `*.draft.json` files produced during research are ephemeral scratch.
 
 All AI lives here, on purpose. The rest of MyPlants (the care app) is 100% deterministic and has
@@ -76,8 +76,26 @@ set -a; source .env; set +a
 ## The workflow, in one paragraph
 
 Given a plant name, the operator resolves it to a single scientific species, dedupes it against
-what is already curated (`db:list` / `db:find`), runs the `plant-researcher` to produce a draft
-record + a raw English brief, hands that to the `editorial-writer` to produce the polished
+what is already curated (`db:list` / `db:find`), runs the `plant_researcher` to produce a draft
+record + a raw English brief, hands that to the `editorial_writer` to produce the polished
 English + Spanish blogpost, validates the record against the schema, and inserts the record plus
 the blogpost (as a **draft** a human later publishes) into the database. Full step-by-step:
 `CLAUDE.md`.
+
+## Codex parity (subagents on both Claude and Codex)
+
+The two subagents are authored **once** as `.claude/agents/*.md` (the source of truth) and
+**generated** to `.codex/agents/*.toml` via `npm run agents:generate`. Drift is caught by
+`npm test` (which runs `agents:check` first), so the Codex projection can never silently diverge
+from the Claude source. Never hand-edit a `.toml`.
+
+- `.codex/config.toml` enables Codex's `multi_agent_v2` (typed `spawn_agent`/`wait_agent`).
+- Codex loads that config + the roles **only if this checkout is TRUSTED**: add
+  `[projects."<abs path to this checkout>"] trust_level = "trusted"` to `~/.codex/config.toml`
+  (or `$CODEX_HOME`). Without it, Codex ignores the repo's `.codex/`.
+- On Codex the operator delegates with the typed spawn contract documented in `AGENTS.md`
+  (`agent_type` selects the role; `task_name` is a unique execution label; `fork_turns="none"`).
+
+`npm run agents:check-schema` is a **billable** live probe (never part of `npm test`) that certifies
+`spawn_agent` is exposed AND this repo's roles actually load; it is run once during de-risk and at
+each deploy to (re)write the per-engine verification record.

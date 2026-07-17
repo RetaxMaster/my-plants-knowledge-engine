@@ -5,22 +5,32 @@ name into ONE validated curated species record plus its blogpost, and persists t
 database. The **database is the single source of truth**; the `*.draft.json` files produced during
 research are ephemeral scratch that must not survive the session or be committed.
 
-## Read this first: the curation workflow is NOT yet available to you
+## Running the curation pipeline on Codex
 
-The full curation pipeline is defined in **`CLAUDE.md`**, and it is currently **Claude-Code-shaped**: it
-is built on two *subagents* (`plant-researcher` and `editorial-writer`, in `.claude/agents/`) whose
-strict separation of duties is a **correctness guarantee**, not an implementation detail — the researcher
-is the only role allowed to establish facts, and the editorial-writer is forbidden from inventing any.
-You have no subagent mechanism, so you cannot reproduce that separation, and improvising it would
-collapse exactly the guarantee that keeps invented plant-care facts out of the database.
+Codex now runs the SAME two-role curation pipeline as Claude, via typed subagents
+(`.codex/agents/plant_researcher.toml` and `.codex/agents/editorial_writer.toml`, generated from
+`.claude/agents/*.md` — never hand-edit a `.toml`). The role separation is a correctness guarantee:
+the researcher is the only role allowed to establish facts; the editorial-writer is forbidden from
+inventing any. `multi_agent_v2` must be enabled and this checkout must be TRUSTED (see below).
 
-**Therefore: do NOT run the curation pipeline. Do not write to the database.** Specifically, never run
-`db:insert`, and never hand-write rows. If you are asked to curate, enrich, or publish a species, say
-plainly that species curation currently runs on Claude in this checkout and stop.
+You delegate with a typed spawn — `agent_type` selects the role's `.codex/agents/<role>.toml`; a spawn
+with NO `agent_type` is a generic agent with none of this repo's doctrine (plausible-looking, wrong):
 
-Porting this workflow to be agent-neutral (the two roles become mandatory *phases* whose prompts both
-agents read from one shared source, instead of Claude-only subagents) is a known, deliberate follow-up.
-Until it lands, the honest division is: **Claude curates; you assist.**
+- Research phase:
+  `spawn_agent(task_name="research_<slug>_r1", agent_type="plant_researcher", message="Research <scientific name>; return the draft record + one raw English brief.", fork_turns="none")`
+  then `wait_agent(...)`.
+- Editorial phase:
+  `spawn_agent(task_name="editorial_<slug>_r1", agent_type="editorial_writer", message="Turn this raw English brief + draft record into the seven-key blogpost JSON.", fork_turns="none")`
+  then `wait_agent(...)`.
+
+`task_name` is a UNIQUE execution label and must never equal the role name. `fork_turns` is `"none"`
+for typed agents. Everything else in `CLAUDE.md` (dedupe, validate, persist, draft-on-edit) applies
+unchanged — you drive the same steps, only the delegation syntax differs from Claude's `Task` tool.
+
+**Trust + generation.** Codex only loads `.codex/config.toml` + `.codex/agents/` if this checkout is
+TRUSTED — add `[projects."<abs path to this checkout>"] trust_level = "trusted"` to `~/.codex/config.toml`
+(or `$CODEX_HOME`). After any `.claude/agents/*.md` edit, run `npm run agents:generate` to refresh the
+tomls (`npm test` fails when they are stale).
 
 ## What you CAN do here
 
@@ -47,5 +57,6 @@ Everything that reads, explains, or investigates — which is why this chat exis
 ## Where the rest of the truth lives
 
 `CLAUDE.md` in this repo holds the complete curation workflow, the validation gate, the persistence
-rules (including the draft-on-edit invariant), and the safety rules. Read it to *understand* the system —
-but per the section above, do not execute the subagent-driven steps yourself.
+rules (including the draft-on-edit invariant), and the safety rules. Read it to *understand* the system,
+then drive the same steps here — invoking the two roles via the typed spawn contract above (the Codex
+equivalent of Claude's `Task` tool).
