@@ -79,6 +79,16 @@ export function syncCodexAgents(repoRoot: string, mode: SyncMode): SyncResult {
     const current = existsSync(target) ? readFileSync(target, "utf8") : null;
     if (current === content) continue;
 
+    // A pre-existing toml that carries NO generated-by header is hand-written and must never be clobbered —
+    // even in write mode, even when a same-named .md source exists (Spec 2 §2: a hand-written toml is refused,
+    // not overwritten). This is the same protection step 3 gives orphans, applied to a NAME COLLISION.
+    if (current !== null && !current.startsWith(GENERATED_MARKER)) {
+      problems.push(
+        `${CODEX_AGENTS}/${name} already exists and carries no generated-by header — refusing to overwrite a hand-written file. Delete it or restore the "${GENERATED_MARKER.trim()}" header, then run: npm run agents:generate`,
+      );
+      continue;
+    }
+
     if (mode === "write") {
       writeFileSync(target, content);
       written.push(`${CODEX_AGENTS}/${name}`);

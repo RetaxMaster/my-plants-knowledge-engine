@@ -73,6 +73,20 @@ describe("syncCodexAgents (fixtures)", () => {
     expect(existsSync(handmade)).toBe(true);
   });
 
+  it("refuses to CLOBBER a hand-written toml that collides with a .md source name (write mode)", () => {
+    // A hand-written toml at the SAME name as a source .md must be refused, not overwritten (Spec 2 §2). This
+    // is the name-collision case the orphan check above does NOT cover.
+    mkdirSync(path.join(root, ".codex/agents"), { recursive: true });
+    const collision = path.join(root, ".codex/agents/probe_agent.toml");
+    const handContent = 'name = "probe_agent"\n# hand-written, no generated header\n';
+    writeFileSync(collision, handContent);
+    expect(syncCodexAgents(root, "check").problems.join("\n")).toMatch(/refusing to overwrite a hand-written file/);
+    const write = syncCodexAgents(root, "write");
+    expect(write.problems.join("\n")).toMatch(/refusing to overwrite a hand-written file/);
+    expect(write.written).toEqual([]); // nothing written
+    expect(readFileSync(collision, "utf8")).toBe(handContent); // byte-for-byte untouched
+  });
+
   it("THROWS on an unknown tools set instead of guessing a sandbox", () => {
     writeFileSync(path.join(root, ".claude/agents/probe_agent.md"), agentMd("Read, Bash"));
     expect(() => syncCodexAgents(root, "write")).toThrow(/unknown tools set/i);

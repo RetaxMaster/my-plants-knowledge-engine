@@ -43,13 +43,37 @@ function fail(message: string): never {
 }
 
 async function main(): Promise<void> {
+  // Fail CLOSED for the whole probe: the record is set `true` ONLY at the very end, on a full pass. Writing
+  // `false` up front means ANY early error below (missing codex binary, unreadable agents dir, execa timeout)
+  // leaves a `false` record instead of a stale `true` that would authorize a flat pipeline (Spec 2 §5).
+  record(false);
+
   const codexBin = process.env.CODEX_BIN ?? "codex";
   const version = (await execa(codexBin, ["--version"])).stdout.trim();
 
-  const expectedRoles = readdirSync(join(REPO_ROOT, ".codex/agents"))
+  // Expected roles come from the SOURCE OF TRUTH (.claude/agents/*.md), NEVER the generated .codex/agents: an
+  // empty or half-generated .codex dir would make the roles check pass VACUOUSLY (missingRoles = []) and
+  // certify a FLAT pipeline — exactly what the gate must prevent (Spec 2 §5/§6).
+  const expectedRoles = readdirSync(join(REPO_ROOT, ".claude/agents"))
+    .filter((f) => f.endsWith(".md"))
+    .map((f) => f.slice(0, -".md".length))
+    .sort();
+  if (expectedRoles.length === 0) {
+    fail(`No .claude/agents/*.md roles found in ${REPO_ROOT} — refusing to certify (an empty role set would authorize a flat pipeline).`);
+  }
+  // The generated .codex/agents set MUST match the source exactly. The drift gate proves this in `npm test`,
+  // but a freshly-pulled deploy checkout could be un-generated — verify it here before trusting the launch.
+  const generatedRoles = readdirSync(join(REPO_ROOT, ".codex/agents"))
     .filter((f) => f.endsWith(".toml"))
     .map((f) => f.slice(0, -".toml".length))
     .sort();
+  const drift = [
+    ...expectedRoles.filter((r) => !generatedRoles.includes(r)),
+    ...generatedRoles.filter((r) => !expectedRoles.includes(r)),
+  ];
+  if (drift.length > 0) {
+    fail(`.codex/agents drift vs .claude/agents (${drift.join(", ")}). Run agents:generate — refusing to certify.`);
+  }
 
   const run = await execa(
     codexBin,
@@ -119,6 +143,7 @@ async function main(): Promise<void> {
 }
 
 main().catch((error) => {
+  record(false); // belt-and-braces: never leave a stale `true` if main() threw before its own fail()
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;
 });
