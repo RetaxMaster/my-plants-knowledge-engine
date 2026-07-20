@@ -25,6 +25,90 @@ The curated care record. Sections with a cross-field invariant are listed under 
 | `growthHabit` | `upright` \| `climber` \| `trailing` \| `clumping` \| `rosette` \| `tree` \| `shrub` \| `other` \| null | optional |
 | `metadata` | object | required |
 
+#### `watering`
+
+| Field | Type | Required |
+|---|---|---|
+| `baseIntervalDays` | integer (0, ∞] | required |
+| `soilDrynessBeforeWatering` | `keep-moist` \| `top-inch-dry` \| `half-dry` \| `mostly-dry` \| `fully-dry` | required |
+| `droughtTolerance` | `low` \| `medium` \| `high` | required |
+| `temperatureSensitivity` | `low` \| `medium` \| `high` | required |
+| `lightSensitivity` | `low` \| `medium` \| `high` | required |
+| `humiditySensitivity` | `low` \| `medium` \| `high` | optional |
+| `reduceInDormancy` | boolean | required |
+
+#### `misting`
+
+| Field | Type | Required |
+|---|---|---|
+| `benefit` | `beneficial` \| `tolerated` \| `avoid` | optional |
+| `baseFrequencyDays` | integer (0, ∞] \| null | optional |
+| `note` | string \| null | optional |
+
+#### `light`
+
+| Field | Type | Required |
+|---|---|---|
+| `minimum` | `low` \| `medium` \| `bright-indirect` \| `direct` | required |
+| `ideal` | `low` \| `medium` \| `bright-indirect` \| `direct` | required |
+| `maximum` | `low` \| `medium` \| `bright-indirect` \| `direct` | required |
+
+#### `temperature`
+
+| Field | Type | Required |
+|---|---|---|
+| `survivalMinC` | number | required |
+| `idealMinC` | number | required |
+| `idealMaxC` | number | required |
+| `survivalMaxC` | number | required |
+
+#### `humidity`
+
+| Field | Type | Required |
+|---|---|---|
+| `minimumPct` | number [0, 100] | required |
+| `idealPct` | number [0, 100] | required |
+
+#### `fertilizing`
+
+| Field | Type | Required |
+|---|---|---|
+| `activeSeasons` | array of `spring` \| `summer` \| `autumn` \| `winter` | required |
+| `inSeasonFrequencyDays` | integer (0, ∞] | required |
+| `reduceInDormancy` | boolean | required |
+
+#### `repotting`
+
+| Field | Type | Required |
+|---|---|---|
+| `typicalIntervalMonths` | integer (0, ∞] | required |
+| `signs` | array of string | optional |
+
+#### `maintenance`
+
+| Field | Type | Required |
+|---|---|---|
+| `pruning` | string | required |
+| `rotationDays` | integer (0, ∞] \| null | required |
+| `leafCleaningDays` | integer (0, ∞] \| null | required |
+| `commonPests` | array of string | optional |
+
+#### `nativeClimate`
+
+| Field | Type | Required |
+|---|---|---|
+| `description` | string | required |
+| `koppen` | string | optional |
+| `hardinessMinC` | number | required |
+| `hardinessMaxC` | number | required |
+
+#### `metadata`
+
+| Field | Type | Required |
+|---|---|---|
+| `confidence` | `low` \| `medium` \| `high` | required |
+| `sources` | array of object | required |
+
 ```json
 {
   "scientificName": "Epipremnum aureum",
