@@ -83,6 +83,10 @@ Everything that reads, explains, or investigates — which is why this chat exis
 
 ## Step 2 — Research (fresh or enrich)
 
+**The complete field reference — every species-record and blogpost field, its type and full value
+vocabulary, with a valid example — is in [`AGENT-TOOLS.md`](./AGENT-TOOLS.md). Consult it instead of
+reading the schema types.**
+
 Invoke the `plant_researcher` subagent (see "Delegating to the two roles" for the syntax on your runtime).
 It returns a complete draft record + ONE raw English brief, and never writes files or touches the DB.
 - **Fresh:** pass the resolved scientific name (and any trusted sources the user gave).

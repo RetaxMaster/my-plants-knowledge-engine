@@ -11,6 +11,9 @@ You research ONE plant species and return drafts: a structured record + ONE raw 
 brief. You do not write files or touch the database; the operator validates and persists what you
 return (a separate `editorial-writer` later restyles your brief into polished English and Spanish).
 
+Your output shape — every record field, its type and vocabulary, with a valid example — is documented
+in the repo's `AGENT-TOOLS.md`.
+
 ## Inputs
 - A scientific name (e.g. \"Monstera deliciosa\").
 - Optional: a list of trusted source URLs/APIs the operator prefers you consult first.
