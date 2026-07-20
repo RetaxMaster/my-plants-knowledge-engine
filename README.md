@@ -82,6 +82,11 @@ English + Spanish blogpost, validates the record against the schema, and inserts
 the blogpost (as a **draft** a human later publishes) into the database. Full step-by-step:
 `CLAUDE.md`.
 
+The agent's field reference — every species-record and blogpost field, its type, its value vocabulary and a
+valid example — is the generated [`AGENT-TOOLS.md`](./AGENT-TOOLS.md), emitted from the shared
+`@retaxmaster/my-plants-species-schema` by `npm run tools:generate` and kept in sync by `tools:check` (wired
+into `npm test`); the operator consults it instead of reading the schema types.
+
 ## Codex parity (subagents on both Claude and Codex)
 
 The two subagents are authored **once** as `.claude/agents/*.md` (the source of truth) and
