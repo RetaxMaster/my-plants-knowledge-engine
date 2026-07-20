@@ -7,6 +7,12 @@ whoever operates this agent, not a commit dump.
 
 ### Added
 
+- **A generated tool reference, `AGENT-TOOLS.md`.** The engine now ships a complete, always-current field
+  reference for the two artifacts it produces — the curated species record and the blogpost — listing every
+  field, its type and its full value vocabulary with a valid example, generated from the authoritative shared
+  schema and guarded by a check that fails if it drifts. The research and editorial subagents consult it
+  instead of reading the schema types by hand, and the same tripwire now also covers the blogpost shape, so a
+  future blogpost field can't ship undocumented.
 - **Four conduct rules the agent must always follow**, shared with the Plant Doctor so both agents behave
   the same way:
   - It **never repairs its own tooling.** If a script, a credential or the database is broken, it reports
