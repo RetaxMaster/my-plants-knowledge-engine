@@ -9,10 +9,15 @@ import { EXAMPLE_RECORD, EXAMPLE_BLOGPOST } from './lib/agent-tools-example.js';
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(REPO_ROOT, 'AGENT-TOOLS.md');
 
-// Pass ALL top-level record sections to the tripwire so that if ANY section GAINS a .refine() later
-// (not just today's five), the build fails until it is documented. hasRefinement peels wrappers, so a
-// section like `misting` (a .default()-wrapped .refine()) is detected.
-const recordSections = speciesRecordSchema.shape as Record<string, import('zod').ZodTypeAny>;
+// Pass ALL top-level record sections AND the blogpost schema to the tripwire so that if ANY of them
+// GAINS a .refine() later (not just today's five record sections), the build fails until it is
+// documented. hasRefinement peels wrappers, so a section like `misting` (a .default()-wrapped .refine())
+// is detected. KNOWN LIMIT: only the TOP node of each entry is inspected — a .refine() on a nested
+// sub-object (e.g. inside `watering`, or on a `cultivars[]` element) is not detected; there are none today.
+const tripwireSections: Record<string, import('zod').ZodTypeAny> = {
+  ...(speciesRecordSchema.shape as Record<string, import('zod').ZodTypeAny>),
+  blogpost: blogpostInputSchema,
+};
 
 const invariants: InvariantMap = {
   schemaAttached: {
@@ -27,7 +32,7 @@ const invariants: InvariantMap = {
   ],
 };
 
-assertInvariantsCover(recordSections, invariants);
+assertInvariantsCover(tripwireSections, invariants);
 
 const body = renderToolDoc({
   title: 'Knowledge Engine — tool reference',
