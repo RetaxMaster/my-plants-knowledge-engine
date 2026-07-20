@@ -13,7 +13,9 @@
     "agents:generate": "tsx scripts/generate-codex-agents.ts",
     "agents:check": "tsx scripts/generate-codex-agents.ts --check",
     "agents:check-schema": "tsx scripts/check-codex-spawn-schema.ts",
-    "test": "npm run agents:check && vitest run",
+    "tools:generate": "tsx scripts/generate-agent-tools.ts",
+    "tools:check": "tsx scripts/generate-agent-tools.ts --check",
+    "test": "npm run agents:check && npm run tools:check && vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
