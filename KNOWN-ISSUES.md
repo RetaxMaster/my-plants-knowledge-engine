@@ -1,25 +1,46 @@
 # Known issues
 
-## Pre-existing sync-rule violation: `CLAUDE.md` and `AGENTS.md` have diverged
+_No open issues._
 
-**Status:** open, recorded 2026-07-20. **Not** introduced by the agents-realtime 3.0.x adoption, and
-deliberately **not** fixed by it.
+---
 
-The workspace sync rule requires `CLAUDE.md` ≡ `AGENTS.md` byte-for-byte, with only the H1 and the
-self-reference sentence permitted to differ. In this repo they do not: as of this recording, `CLAUDE.md` is
-229 lines and `AGENTS.md` is 85 (219/75 before the agents-realtime 3.0.x edits landed) — `AGENTS.md` is a
-condensed **summary**, which the sync rule names explicitly as the forbidden outcome. Even individual rules
-sit at different places in each file.
+## RESOLVED 2026-07-20 — `CLAUDE.md` / `AGENTS.md` divergence
 
-**Why the 3.0.x adoption did not fix it.** Reconciling the two means choosing which content is canonical for
-a document that steers this agent's actual behaviour — a **behavioural change to the agent**, which deserves
-its own review rather than riding along inside a package-adoption diff nobody would think to check for it.
+**Status:** closed. Recorded 2026-07-20 during the agents-realtime 3.0.x adoption, reconciled the same day.
 
-That feature applied the same edits to both files (the `[system]` marker section, rewritten for the
-structural `<agents-rt:system-message>` frame, and the two-image-channels section) and nothing more: it
-introduced no new divergence and removed none of the existing one. `scripts/guide-marker.test.ts` asserts
-edit-level equality for exactly that reason, and deliberately does **not** assert whole-file equality, which
-would fail by design.
+### What was wrong
 
-**To close this:** decide which file is canonical, reconcile them under their own review, then replace
-`scripts/guide-marker.test.ts`'s edit-level assertions with a whole-file one.
+`CLAUDE.md` was 229 lines and `AGENTS.md` was 85. `AGENTS.md` carried its own Codex-specific delegation
+section but delegated everything else to its peer with the line *"everything else in `CLAUDE.md` (dedupe,
+validate, persist, draft-on-edit) applies unchanged"*.
+
+### The original diagnosis was wrong, and the correction matters
+
+This was first recorded as a *byte-for-byte sync-rule violation*. It was not. The two files address two
+different runtimes, so byte equality was never the right target — and "fixing" it by flattening them into one
+byte-identical file would have **deleted** the Codex typed-spawn contract. A rule applied without checking
+whether it fits is how a correct-looking change destroys content.
+
+The real defect was narrower and more serious: **Codex loads `AGENTS.md`, and nothing forces it to open
+`CLAUDE.md`.** So the guide the Codex runtime actually reads was missing Step 0 (common-name
+disambiguation), the critical sibling-taxon dedupe in Step 1, the validation gate, and the draft-on-edit
+invariant. That is not documentation hygiene — it is a curation run reaching the database without its
+safeguards.
+
+### How it was closed
+
+The workspace guide gained an explicit **intent-parity rule** for the agent-driven submodules: the pair must
+be identical in intent — same workflow, steps, rules, invariants and warnings, stated **in full in both
+files** — with only each runtime's delegation syntax allowed to differ, and **neither file may delegate its
+content to the other**.
+
+Both files were merged into one body stating both the Claude `Task` path and the Codex typed-spawn path, which
+lands them at byte equality anyway. `scripts/guide-marker.test.ts` (edit-level assertions only) was replaced
+by `scripts/guide-pair.test.ts`, which asserts whole-file parity, that both runtimes' syntax appears in both
+files, and that neither file reintroduces a "see the other file" delegation.
+
+### The lesson worth keeping
+
+A guide pair split across runtimes hides a failure mode a diff does not show: a rule that exists in one file
+is, for the other runtime, a rule that does not exist at all. Parity here is a safety property, not a
+formatting preference — which is why it is now enforced by a test rather than by reviewer attention.
