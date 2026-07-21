@@ -3,3 +3,13 @@ node_modules/
 *.draft.md
 *.tgz
 .env
+# A local interactive-session permission grant must never land beside the tracked .claude/agents guides.
+.claude/settings.local.json
+# .env.example points at the live local DB; a quick mysqldump while debugging is the obvious artifact.
+*.sql
+*.dump
+# Editor swap/backup files, and Node fatal-error reports (mysql2/execa can write these to cwd).
+*.swp
+*.swo
+*~
+report.*.json
