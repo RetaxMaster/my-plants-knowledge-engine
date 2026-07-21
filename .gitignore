@@ -2,7 +2,11 @@ node_modules/
 *.draft.json
 *.draft.md
 *.tgz
+# Every .env form is ignored: the bare file AND every variant (.env.local, .env.bak, ...).
+# `.env.*` alone does NOT match a bare `.env` — both lines are required, and .env.example is negated back in.
 .env
+.env.*
+!.env.example
 # A local interactive-session permission grant must never land beside the tracked .claude/agents guides.
 .claude/settings.local.json
 # .env.example points at the live local DB; a quick mysqldump while debugging is the obvious artifact.
