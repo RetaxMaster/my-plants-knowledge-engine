@@ -29,3 +29,12 @@ whoever operates this agent, not a commit dump.
     two separate channels: the timeline (a record's own images, with their own dates and metadata) and an
     attachment (an image you attach to the message you are sending right now, with no date or metadata of
     its own). It will not file an attachment as though it were part of a record's history.
+
+### Changed
+
+- **Internal only — nothing about what this engine does has changed.** Its session-workspace resolver,
+  read-only DB helper, and Claude/Codex subagent-parity generator and checker now come from the shared
+  species-schema package's `agent-kit` instead of the engine's own `scripts/lib`, which is where the Plant
+  Doctor's equivalents already lived. The two copies had quietly drifted apart before this change; they are
+  now one shared implementation. The onboarding workflow, the subagents, and everything this repo produces
+  are unaffected — this entry exists so a reader does not go looking for a behavior change that isn't here.
