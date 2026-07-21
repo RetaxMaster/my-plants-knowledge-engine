@@ -121,3 +121,20 @@ now instead of its own `scripts/lib`. Per-file disposition:
 | `codex-agents.test.ts` | migrated, difference **injected as a parameter** | the whole 4-line diff was the `describe()` label |
 | `codex-delegation.test.ts` | migrated, difference **injected as a parameter** | same |
 | `guide-pair.test.ts` | **deferred** | the KE's copy is strictly stronger (4 assertions vs 2) and the pair is under active reconciliation; "which one wins" is a design question, not a cleanup |
+
+### `execa` / `smol-toml` / `yaml` / `mysql2` are NOT unused
+
+Nothing in this repo's own source imports `execa`, `smol-toml` or `yaml` — a plain grep will make them look
+orphaned. They are not: `@retaxmaster/my-plants-species-schema` declares all three (plus `mysql2`) as
+**optional peer dependencies** for its `agent-kit`, and npm does **not** install a dependency's optional
+peers on its own — the consuming repo has to carry them itself, or the kit's own imports fail to resolve at
+run time. Concretely, this repo's copy satisfies:
+
+- `smol-toml` and `yaml` — imported by the kit's `agent-kit/codex-parity/codex-agent.ts`
+- `smol-toml` — also imported by `agent-kit/codex-parity/codex-delegation.ts`
+- `execa` — imported by `agent-kit/cli/check-codex-spawn-schema.ts`
+- `mysql2` — imported by `agent-kit/db.ts` (a real `dependency` here, for the same reason)
+
+Removing any of them breaks `agents:check` / `agents:generate` (which run through the `smol-toml`/`yaml`/
+`execa`-using modules above) and `agents:check-schema` — the latter is the probe the production deploy's
+Codex re-verification window runs. Do not delete them just because nothing here imports them directly.
