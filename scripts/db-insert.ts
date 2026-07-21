@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import { buildSpeciesRow, buildBlogpostRow } from './lib/db-row.js';
 import { validateRecord } from './lib/validate.js';
-import { connectToDb } from './lib/db.js';
+import { connectToDb } from '@retaxmaster/my-plants-species-schema/agent-kit/db';
 import { type RowDataPacket } from 'mysql2/promise';
 import { BlogpostStatus } from '@retaxmaster/my-plants-species-schema';
 import { SPECIES_UPSERT_SQL, selectBlogpostUpsertSql } from './lib/db-sql.js';

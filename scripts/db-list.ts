@@ -1,5 +1,5 @@
 import { type RowDataPacket } from 'mysql2/promise';
-import { connectToDb } from './lib/db.js';
+import { connectToDb } from '@retaxmaster/my-plants-species-schema/agent-kit/db';
 
 // List every curated species' scientific name (comma-separated) so the operator can scan what
 // we already have and judge — critically — whether the target species is among them. The

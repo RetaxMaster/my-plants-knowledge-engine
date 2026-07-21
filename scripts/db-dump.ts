@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import { type RowDataPacket } from 'mysql2/promise';
 import { toSpeciesSlug } from '@retaxmaster/my-plants-species-schema';
-import { connectToDb } from './lib/db.js';
+import { connectToDb } from '@retaxmaster/my-plants-species-schema/agent-kit/db';
 import { buildDumpFiles, type StoredBlogpost } from './lib/dump-files.js';
 
 // Dump ONE stored species (record + its blogpost, if any) to ephemeral draft files so the operator can

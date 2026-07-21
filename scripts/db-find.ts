@@ -1,7 +1,7 @@
 import { parseArgs } from 'node:util';
 import { type RowDataPacket } from 'mysql2/promise';
 import { toSpeciesSlug } from '@retaxmaster/my-plants-species-schema';
-import { connectToDb } from './lib/db.js';
+import { connectToDb } from '@retaxmaster/my-plants-species-schema/agent-kit/db';
 
 // Fetch ALL stored data (record + its blogpost, if any) for ONE species, by scientific name (slug is
 // derived) or explicit slug. This is a data tool, not a verdict: the operator inspects the result and
