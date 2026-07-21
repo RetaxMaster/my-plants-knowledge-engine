@@ -104,3 +104,20 @@ from the Claude source. Never hand-edit a `.toml`.
 `npm run agents:check-schema` is a **billable** live probe (never part of `npm test`) that certifies
 `spawn_agent` is exposed AND this repo's roles actually load; it is run once during de-risk and at
 each deploy to (re)write the per-engine verification record.
+
+### Shared plumbing (agent-kit)
+
+This repo used to carry its own copy of the same agent plumbing the Plant Doctor repo also
+shipped. Migrating the doctor alone would have left three states where there are two — doctor on
+the shared kit, the KE on its own drifted copy — so the KE moved onto
+`@retaxmaster/my-plants-species-schema`'s `agent-kit` subpath family too. Nothing about what the
+Knowledge Engine does has changed — its plumbing simply comes from the shared `agent-kit` subpath
+now instead of its own `scripts/lib`. Per-file disposition:
+
+| File | Outcome | Why |
+|---|---|---|
+| `lib/db.ts` | reconciled and migrated | the 7-line diff was **comment-only**; the executable code was byte-identical |
+| `lib/codex-agent.ts` | reconciled and migrated | the 10-line diff was **comment-only** (each repo listed its own roles) |
+| `codex-agents.test.ts` | migrated, difference **injected as a parameter** | the whole 4-line diff was the `describe()` label |
+| `codex-delegation.test.ts` | migrated, difference **injected as a parameter** | same |
+| `guide-pair.test.ts` | **deferred** | the KE's copy is strictly stronger (4 assertions vs 2) and the pair is under active reconciliation; "which one wins" is a design question, not a cleanup |
