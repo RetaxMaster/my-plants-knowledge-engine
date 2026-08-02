@@ -17,12 +17,14 @@ async function main(): Promise<void> {
   const { values } = parseArgs({
     options: {
       record: { type: 'string' },
+      brief: { type: 'string' },
       blogpost: { type: 'string' },
     },
   });
-  if (!values.record || !values.blogpost) {
+  if (!values.record || !values.brief || !values.blogpost) {
     console.error(
-      'Usage: npm run db:insert -- --record <slug>.draft.json --blogpost <slug>.blogpost.draft.json',
+      'Usage: npm run db:insert -- --record <slug>.draft.json --brief <slug>.brief.md ' +
+        '--blogpost <slug>.blogpost.draft.json',
     );
     process.exit(2);
   }
@@ -39,6 +41,20 @@ async function main(): Promise<void> {
   if (!validated.ok) {
     console.error(`✗ ${values.record} failed validation; not inserting:`);
     for (const issue of validated.issues) console.error(`  - ${issue}`);
+    process.exit(1);
+  }
+
+  // 1b) Read the RAW research brief (Spec 3 §3.1). It is long-form Markdown ending in a `## Sources` list,
+  // read verbatim — it is the researcher's primary output and nothing here reinterprets it.
+  let researchBrief: string;
+  try {
+    researchBrief = await readFile(values.brief, 'utf8');
+  } catch (err) {
+    console.error(`✗ ${values.brief} could not be read: ${(err as Error).message}`);
+    process.exit(1);
+  }
+  if (researchBrief.trim().length === 0) {
+    console.error(`✗ ${values.brief} is empty; not inserting. A brief is required for a full curation.`);
     process.exit(1);
   }
 
@@ -63,7 +79,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const speciesRow = buildSpeciesRow(validated.record, draft);
+  const speciesRow = buildSpeciesRow(validated.record, draft, researchBrief);
   const bp = blogpost.row;
 
   // 4) Persist BOTH in one transaction on one connection. NOW(3) for updated_at is inline in the SQL,
@@ -90,6 +106,7 @@ async function main(): Promise<void> {
       speciesRow.slug,
       speciesRow.scientificName,
       speciesRow.recordJson,
+      speciesRow.researchBrief,
     ]);
     await conn.execute(selectBlogpostUpsertSql(wasPublished), [
       bp.slug,
@@ -113,10 +130,10 @@ async function main(): Promise<void> {
 
   console.log(
     wasPublished
-      ? `✓ Upserted ${speciesRow.slug} (species record + blogpost) into the DB. ` +
+      ? `✓ Upserted ${speciesRow.slug} (species record + research brief + blogpost) into the DB. ` +
           'The blogpost was PUBLISHED and was forced back to DRAFT (status = 0) for human re-review. ' +
           'Confirm the ACTUAL stored status with `npm run db:find` — do not trust this line.'
-      : `✓ Upserted ${speciesRow.slug} (species record + blogpost) into the DB. ` +
+      : `✓ Upserted ${speciesRow.slug} (species record + research brief + blogpost) into the DB. ` +
           'A first insert is a DRAFT (status = 0); an existing DRAFT stays a draft and its status is ' +
           'preserved (no publish/unpublish). Confirm the ACTUAL stored status with `npm run db:find` — ' +
           'do not trust this line.',
