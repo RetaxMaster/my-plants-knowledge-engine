@@ -9,6 +9,7 @@
     "db:list": "tsx scripts/db-list.ts",
     "db:find": "tsx scripts/db-find.ts",
     "db:dump": "tsx scripts/db-dump.ts",
+    "db:brief": "tsx scripts/db-brief.ts",
     "db:insert": "tsx scripts/db-insert.ts",
     "agents:generate": "agent-kit-codex-agents",
     "agents:check": "agent-kit-codex-agents --check",

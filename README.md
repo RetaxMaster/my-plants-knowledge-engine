@@ -62,7 +62,9 @@ npm run validate   # validate a draft record against the species-schema contract
 npm run db:list    # list the scientific names already curated (dedupe check)
 npm run db:find    # pull one species' full record + blogpost by name
 npm run db:dump    # dump a species' stored data
+npm run db:brief   # read the saved raw research brief (read-only)
 npm run db:insert  # persist a curated record + blogpost to the DB
+npm run db:recure  # re-curation: writes the record, the brief and the species' repot-sign rows — never touches the blogpost
 npm test           # agents:check && tools:check && typecheck && vitest run (the full gate)
 npm run typecheck  # tsc --noEmit on its own — also runs as a step of `npm test`
 ```
