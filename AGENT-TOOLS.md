@@ -23,6 +23,8 @@ The curated care record. Sections with a cross-field invariant are listed under 
 | `nativeClimate` | object | required |
 | `cultivars` | array of object | optional |
 | `growthHabit` | `upright` \| `climber` \| `trailing` \| `clumping` \| `rosette` \| `tree` \| `shrub` \| `other` \| null | optional |
+| `juvenilePeriodMonths` | integer (0, ∞] \| null | optional |
+| `juvenileRepotIntervalMonths` | integer (0, ∞] \| null | optional |
 | `metadata` | object | required |
 
 #### `watering`
@@ -113,6 +115,8 @@ The curated care record. Sections with a cross-field invariant are listed under 
 {
   "scientificName": "Epipremnum aureum",
   "growthHabit": "climber",
+  "juvenilePeriodMonths": null,
+  "juvenileRepotIntervalMonths": null,
   "commonNamesEn": [
     "Pothos",
     "Golden pothos",

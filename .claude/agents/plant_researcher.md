@@ -57,8 +57,8 @@ idealMaxC ≤ survivalMaxC), `humidity` (minimumPct ≤ idealPct), `fertilizing`
 inSeasonFrequencyDays, reduceInDormancy), `repotting` (typicalIntervalMonths, signs),
 `maintenance` (pruning, rotationDays|null, leafCleaningDays|null, commonPests), `misting`
 (benefit, baseFrequencyDays, note), `nativeClimate` (description, koppen?, hardinessMinC ≤
-hardinessMaxC), `cultivars`, `growthHabit`, and `metadata` (confidence,
-sources:[{title,url,accessedAt:"YYYY-MM-DD"}]).
+hardinessMaxC), `cultivars`, `growthHabit`, `juvenilePeriodMonths`, `juvenileRepotIntervalMonths`, and
+`metadata` (confidence, sources:[{title,url,accessedAt:"YYYY-MM-DD"}]).
 
 **`cultivars` — research ALL the well-known named varieties of the species.** A cultivar is a
 human-selected variety within the SAME species (e.g. *Dracaena fragrans* 'Massangeana', 'Lemon
@@ -108,6 +108,33 @@ sentence explaining why no single habit fits. A bare `other` with no reason FAIL
 When `growthHabit` is `other`, the draft JSON also carries `growthHabitOtherReason` (a KE-curation field,
 not part of the shared species record). It records your justification and is persisted alongside the
 curated record.
+
+**`juvenilePeriodMonths`** (a positive whole number of months, or `null`) is the age below which a
+specimen of this species is still developing — the age at which growers stop treating it as a young plant
+and start treating it as an established one. It is a **species-level simplification of a continuum**: a
+plant does not stop being juvenile on a birthday, and the app knows that. Research it as the age at which
+this species typically reaches its mature form / first flowers / stops needing to be potted on every few
+months, and cite the source. Use `null` **only** when no source supports a figure — a guessed number here
+silently changes when a real owner's plant switches care regimes.
+
+**`juvenileRepotIntervalMonths`** (a positive whole number of months, or `null`) is how often a **young**
+specimen of this species is potted on, in months — *"how often do you pot on a young spider plant?"* is an
+ordinary, citable horticultural question, and the answer is typically **weeks to a few months** for a fast
+juvenile against **a year or more** for a settled adult (`repotting.typicalIntervalMonths`, which stays
+the ADULT figure and is unchanged). It is a **researched fact, not a derived multiplier**: do not compute
+it from `typicalIntervalMonths`, and do not invent a pot-series ratio — no source states one as a law.
+
+**Evidence you must cite for each.** For `juvenilePeriodMonths`: a source describing this species' time to
+maturity, first flowering, or the end of its rapid-establishment phase. For
+`juvenileRepotIntervalMonths`: a source describing nursery / young-plant potting-on practice for this
+species (or, failing a species-specific one, for its genus, stated as such). **Never invent a source.** If
+neither figure is supported, set both to `null` — the app falls back to the adult interval, which is
+exactly today's behaviour, and missing data never shifts a schedule.
+
+**These two are CARE-ENGINE inputs, unlike `growthHabit`.** A wrong `juvenileRepotIntervalMonths` moves a
+real owner's repot date. Bias conservative: when the sources disagree, prefer the LONGER interval and the
+SHORTER juvenile period — under-repotting is recoverable, and premature repotting is surgery on a plant
+that did not need it.
 
 ### 2. Draft brief — ONE raw English brief
 A single English Markdown brief: an informative write-up for a curious owner covering origins,

@@ -12,6 +12,8 @@ import { blogpostInputSchema } from '@retaxmaster/my-plants-species-schema';
 export const EXAMPLE_RECORD: SpeciesRecord = {
   "scientificName": "Epipremnum aureum",
   "growthHabit": "climber",
+  "juvenilePeriodMonths": null,
+  "juvenileRepotIntervalMonths": null,
   "commonNamesEn": [
     "Pothos",
     "Golden pothos",
