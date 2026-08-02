@@ -92,7 +92,7 @@ Everything that reads, explains, or investigates — which is why this chat exis
 vocabulary, with a valid example — is in [`AGENT-TOOLS.md`](./AGENT-TOOLS.md). Consult it instead of
 reading the schema types.**
 
-Invoke the `plant_researcher` subagent (see "Delegating to the two roles" for the syntax on your runtime).
+Invoke the `plant_researcher` subagent (see "Delegating to the three roles" for the syntax on your runtime).
 It returns a complete draft record + ONE raw English brief, and never writes files or touches the DB.
 - **Fresh:** pass the resolved scientific name (and any trusted sources the user gave).
 - **Enrich:** also pass the existing record + the existing English guide (the stored blogpost's
@@ -130,7 +130,7 @@ surgery on a plant that did not need it.
 ## Step 2.5 — Editorialize (the house voice)
 
 Invoke the `editorial_writer` subagent (you, the operator, invoke it — a subagent cannot invoke
-another subagent; see "Delegating to the two roles" for the syntax on your runtime). Pass it the
+another subagent; see "Delegating to the three roles" for the syntax on your runtime). Pass it the
 researcher's **raw English brief** and the **draft record** (its factual anchor).
 
 **On an ENRICH pass, ALSO pass it the current stored blogpost — the seven-key JSON

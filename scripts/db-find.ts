@@ -9,10 +9,56 @@ import { connectToDb } from '@retaxmaster/my-plants-species-schema/agent-kit/db'
 // that share names) before choosing to enrich it or research a new one. Three states: no species →
 // NOT_FOUND; species but no blogpost → print the record + a "no blogpost yet" note; species + blogpost →
 // print the record + the structured blogpost.
+//
+// `--repot-signs <slug>` is a SEPARATE, standalone mode (Step 2.6's ENRICH-mode lookup): prints the
+// species' own ACTIVE curated repot-sign rows — never the universal ones, which are app-seeded and not
+// this species' territory to re-curate — so the operator can hand the repot_signs_researcher subagent
+// exactly the semantic slugs that still apply. Read-only, mirrors repos/my-plants-api's
+// RepotSignsService.activeRowsForSpecies() species-owned half (the universal half is deliberately
+// excluded here, since ENRICH mode only ever revises a species' OWN rows).
+async function printRepotSigns(slug: string): Promise<void> {
+  const conn = await connectToDb();
+  const [rows] = await conn.execute<RowDataPacket[]>(
+    'SELECT `id`, `label_en`, `label_es`, `help_en`, `help_es`, `evidence`, `sort_order` ' +
+      'FROM `repot_signs` WHERE `species_slug` = ? AND `active` = TRUE ORDER BY `sort_order` ASC, `id` ASC',
+    [slug],
+  );
+  await conn.end();
+  if (rows.length === 0) {
+    console.log(`NO_SIGNS: no active species-owned repot-sign rows for slug "${slug}" (a fresh species, or one with none curated yet).`);
+    return;
+  }
+  console.log(`FOUND ${rows.length} active species-owned repot-sign row(s) for "${slug}":`);
+  console.log(
+    JSON.stringify(
+      rows.map((r) => ({
+        // The semantic slug is the id's own suffix after the reserved `--` separator (composeSpeciesRepotSignId's inverse).
+        semanticSlug: r.id.slice(`${slug}--`.length),
+        labelEn: r.label_en,
+        labelEs: r.label_es,
+        helpEn: r.help_en,
+        helpEs: r.help_es,
+        evidence: r.evidence,
+        sortOrder: r.sort_order,
+      })),
+      null,
+      2,
+    ),
+  );
+}
+
 async function main(): Promise<void> {
-  const { values } = parseArgs({ options: { name: { type: 'string' }, slug: { type: 'string' } } });
+  const { values } = parseArgs({
+    options: { name: { type: 'string' }, slug: { type: 'string' }, 'repot-signs': { type: 'string' } },
+  });
+  if (values['repot-signs']) {
+    await printRepotSigns(values['repot-signs']);
+    return;
+  }
   if (!values.name && !values.slug) {
-    console.error('Usage: npm run db:find -- --name "<scientific name>"   (or --slug <slug>)');
+    console.error(
+      'Usage: npm run db:find -- --name "<scientific name>"   (or --slug <slug>, or --repot-signs <slug>)',
+    );
     process.exit(2);
   }
   const slug = values.slug ?? toSpeciesSlug(values.name as string);
