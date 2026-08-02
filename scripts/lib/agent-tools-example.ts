@@ -82,20 +82,36 @@ export const EXAMPLE_RECORD: SpeciesRecord = {
     ]
   },
   "maintenance": {
-    "pruning": "Low-maintenance. Tip-prune in spring/summer just above a leaf node to encourage branching and a bushier plant and to keep long trailing vines tidy; cut back leggy or bare stems to rejuvenate. Remove yellowed or damaged leaves anytime. Prunings root easily in water or moist mix as new plants.",
+    "pruning": {
+      "en": "Low-maintenance. Tip-prune in spring/summer just above a leaf node to encourage branching and a bushier plant and to keep long trailing vines tidy; cut back leggy or bare stems to rejuvenate. Remove yellowed or damaged leaves anytime. Prunings root easily in water or moist mix as new plants.",
+      "es": "Bajo mantenimiento. Poda las puntas en primavera/verano justo encima de un nudo foliar para fomentar la ramificación y una planta más tupida, y para mantener ordenadas las guías colgantes largas; corta los tallos desnudos o desgarbados para rejuvenecer la planta. Retira las hojas amarillas o dañadas en cualquier momento. Los esquejes enraízan fácilmente en agua o en sustrato húmedo para producir nuevas plantas."
+    },
     "rotationDays": 30,
     "leafCleaningDays": 30,
-    "commonPests": [
-      "Mealybugs",
-      "Spider mites",
-      "Scale",
-      "Fungus gnats",
-      "Root rot (from overwatering / poor drainage)",
-      "Fungal leaf spot / botrytis"
-    ]
+    "commonPests": {
+      "en": [
+        "Mealybugs",
+        "Spider mites",
+        "Scale",
+        "Fungus gnats",
+        "Root rot (from overwatering / poor drainage)",
+        "Fungal leaf spot / botrytis"
+      ],
+      "es": [
+        "Cochinillas",
+        "Ácaros",
+        "Escamas",
+        "Mosquitos del sustrato",
+        "Pudrición de raíz (por exceso de riego / mal drenaje)",
+        "Mancha foliar fúngica / botritis"
+      ]
+    }
   },
   "nativeClimate": {
-    "description": "Tropical evergreen aroid of warm, humid lowland forests in the Pacific. Most current botanical authorities (Missouri Botanical Garden, Kew/Wikipedia) treat it as native to Mo'orea in the Society Islands of French Polynesia, though some horticultural references (e.g. UF/IFAS) cite the Solomon Islands; either way it is a frost-free, humid tropical-forest plant. In the wild it is a hemiepiphytic climber that scrambles along the forest floor and ascends tree trunks, its juvenile heart-shaped leaves giving way to much larger, lobed mature leaves high in the canopy. It is now naturalized — and an aggressive invasive — across many tropical and subtropical regions worldwide (including parts of Florida, South Africa, Australia and Southeast Asia).",
+    "description": {
+      "en": "Tropical evergreen aroid of warm, humid lowland forests in the Pacific. Most current botanical authorities (Missouri Botanical Garden, Kew/Wikipedia) treat it as native to Mo'orea in the Society Islands of French Polynesia, though some horticultural references (e.g. UF/IFAS) cite the Solomon Islands; either way it is a frost-free, humid tropical-forest plant. In the wild it is a hemiepiphytic climber that scrambles along the forest floor and ascends tree trunks, its juvenile heart-shaped leaves giving way to much larger, lobed mature leaves high in the canopy. It is now naturalized — and an aggressive invasive — across many tropical and subtropical regions worldwide (including parts of Florida, South Africa, Australia and Southeast Asia).",
+      "es": "Aroide tropical perennifolio de bosques cálidos y húmedos de tierras bajas del Pacífico. La mayoría de las autoridades botánicas actuales (Missouri Botanical Garden, Kew/Wikipedia) lo consideran nativo de Mo'orea, en las Islas de la Sociedad de la Polinesia Francesa, aunque algunas referencias hortícolas (p. ej. UF/IFAS) citan las Islas Salomón; en cualquier caso, es una planta de bosque tropical húmedo libre de heladas. En estado silvestre es una trepadora hemiepífita que se arrastra por el suelo del bosque y asciende por los troncos de los árboles; sus hojas juveniles en forma de corazón dan paso a hojas adultas mucho más grandes y lobuladas en lo alto del dosel. Actualmente está naturalizada —y es una invasora agresiva— en muchas regiones tropicales y subtropicales del mundo (incluyendo partes de Florida, Sudáfrica, Australia y el sureste asiático)."
+    },
     "koppen": "Af",
     "hardinessMinC": 10,
     "hardinessMaxC": 35
@@ -109,36 +125,63 @@ export const EXAMPLE_RECORD: SpeciesRecord = {
         "Devil's ivy (typical form)"
       ],
       "group": null,
-      "description": "The classic, most common form: glossy mid-green heart-shaped leaves marbled and streaked with golden-yellow. Vigorous, fast-growing trailer/climber and the most forgiving of low light.",
+      "description": {
+        "en": "The classic, most common form: glossy mid-green heart-shaped leaves marbled and streaked with golden-yellow. Vigorous, fast-growing trailer/climber and the most forgiving of low light.",
+        "es": "La forma clásica y más común: hojas brillantes, verde medio, en forma de corazón, jaspeadas y veteadas de amarillo dorado. Trepadora/colgante vigorosa y de crecimiento rápido, y la más tolerante a la poca luz."
+      },
       "careNote": null
     },
     {
       "name": "Marble Queen",
       "alsoKnownAs": [],
       "group": null,
-      "description": "Heavily variegated form: green leaves streaked and splashed with creamy white, often roughly half-and-half. Slower and more compact than plain golden pothos.",
-      "careNote": "Heavily white-variegated, so it has less chlorophyll — give it bright indirect light to keep the variegation crisp and prevent reversion to green; grows more slowly."
+      "description": {
+        "en": "Heavily variegated form: green leaves streaked and splashed with creamy white, often roughly half-and-half. Slower and more compact than plain golden pothos.",
+        "es": "Forma muy variegada: hojas verdes veteadas y salpicadas de blanco cremoso, a menudo en proporciones casi iguales. Más lenta y compacta que el potos dorado liso."
+      },
+      "careNote": {
+        "en": "Heavily white-variegated, so it has less chlorophyll — give it bright indirect light to keep the variegation crisp and prevent reversion to green; grows more slowly.",
+        "es": "Al estar fuertemente variegada de blanco, tiene menos clorofila: dale luz indirecta brillante para mantener la variegación nítida y evitar que revierta a verde; crece más despacio."
+      }
     },
     {
       "name": "Snow Queen",
       "alsoKnownAs": [],
       "group": null,
-      "description": "Even whiter than Marble Queen — predominantly creamy-white leaves with green speckling and streaks. Striking but the least chlorophyll of the white-variegated forms.",
-      "careNote": "Needs abundant bright indirect light to sustain its mostly-white leaves and avoid scorch; among the slowest-growing and most light-hungry cultivars."
+      "description": {
+        "en": "Even whiter than Marble Queen — predominantly creamy-white leaves with green speckling and streaks. Striking but the least chlorophyll of the white-variegated forms.",
+        "es": "Aún más blanca que Marble Queen: hojas predominantemente blanco cremoso con motas y vetas verdes. Llamativa, pero la que tiene menos clorofila de las formas variegadas en blanco."
+      },
+      "careNote": {
+        "en": "Needs abundant bright indirect light to sustain its mostly-white leaves and avoid scorch; among the slowest-growing and most light-hungry cultivars.",
+        "es": "Necesita abundante luz indirecta brillante para sostener sus hojas mayormente blancas y evitar quemaduras; es de los cultivares de crecimiento más lento y mayor exigencia de luz."
+      }
     },
     {
       "name": "Neon",
       "alsoKnownAs": [],
       "group": null,
-      "description": "Solid bright chartreuse / lime-green leaves with no variegation, thinner and slightly more heart-shaped. New growth is the most luminous.",
-      "careNote": "Not variegated, so it tolerates lower light, but its neon glow is brightest in good bright indirect light; in deep shade the colour dulls toward plain green."
+      "description": {
+        "en": "Solid bright chartreuse / lime-green leaves with no variegation, thinner and slightly more heart-shaped. New growth is the most luminous.",
+        "es": "Hojas de un verde lima/chartreuse brillante y sólido, sin variegación, más delgadas y con forma de corazón algo más marcada. El crecimiento nuevo es el más luminoso."
+      },
+      "careNote": {
+        "en": "Not variegated, so it tolerates lower light, but its neon glow is brightest in good bright indirect light; in deep shade the colour dulls toward plain green.",
+        "es": "Al no ser variegada, tolera menos luz, pero su brillo neón es más intenso con buena luz indirecta brillante; en sombra profunda el color se apaga hacia un verde liso."
+      }
     },
     {
       "name": "Pearls and Jade",
       "alsoKnownAs": [],
       "group": null,
-      "description": "A University of Florida sport of Marble Queen: smaller teardrop-shaped leaves edged and speckled in white and silvery-grey over green, with variegation concentrated near the margins. Compact, slower growth.",
-      "careNote": "Smaller-leaved and white-edged; bright indirect light keeps the crisp margin variegation and supports its slower growth."
+      "description": {
+        "en": "A University of Florida sport of Marble Queen: smaller teardrop-shaped leaves edged and speckled in white and silvery-grey over green, with variegation concentrated near the margins. Compact, slower growth.",
+        "es": "Una mutación de Marble Queen desarrollada por la Universidad de Florida: hojas más pequeñas, en forma de gota, con bordes y motas blancas y gris plateado sobre verde, con la variegación concentrada cerca de los márgenes. Compacta, de crecimiento más lento."
+      },
+      "careNote": {
+        "en": "Smaller-leaved and white-edged; bright indirect light keeps the crisp margin variegation and supports its slower growth.",
+        "es": "De hoja más pequeña y borde blanco; la luz indirecta brillante mantiene nítida la variegación del margen y favorece su crecimiento más lento."
+      }
     },
     {
       "name": "N'Joy",
@@ -147,8 +190,14 @@ export const EXAMPLE_RECORD: SpeciesRecord = {
         "N Joy"
       ],
       "group": null,
-      "description": "Compact cultivar with small leaves in bold, well-defined blocks of green and creamy white (less speckled, more patchy than Marble Queen). Bushier, shorter internodes.",
-      "careNote": "Strongly variegated and small-leaved; needs bright indirect light to hold colour and grows slowly."
+      "description": {
+        "en": "Compact cultivar with small leaves in bold, well-defined blocks of green and creamy white (less speckled, more patchy than Marble Queen). Bushier, shorter internodes.",
+        "es": "Cultivar compacto con hojas pequeñas en bloques marcados y bien definidos de verde y blanco cremoso (menos moteado y más en parches que Marble Queen). Más tupido, con entrenudos más cortos."
+      },
+      "careNote": {
+        "en": "Strongly variegated and small-leaved; needs bright indirect light to hold colour and grows slowly.",
+        "es": "Fuertemente variegada y de hoja pequeña; necesita luz indirecta brillante para conservar el color y crece despacio."
+      }
     },
     {
       "name": "Manjula",
@@ -156,14 +205,23 @@ export const EXAMPLE_RECORD: SpeciesRecord = {
         "Happy Leaf"
       ],
       "group": null,
-      "description": "Patented cultivar with broad, wavy-edged leaves that don't lie flat, swirled and splashed with green, cream, white and silvery tones; each leaf is uniquely marbled.",
-      "careNote": "Heavily and palely variegated with wavy leaves; bright indirect light keeps the marbling vivid, and it grows more slowly and bushier than golden pothos."
+      "description": {
+        "en": "Patented cultivar with broad, wavy-edged leaves that don't lie flat, swirled and splashed with green, cream, white and silvery tones; each leaf is uniquely marbled.",
+        "es": "Cultivar patentado de hojas anchas y de borde ondulado que no quedan planas, con remolinos y salpicaduras de tonos verde, crema, blanco y plateado; cada hoja está jaspeada de forma única."
+      },
+      "careNote": {
+        "en": "Heavily and palely variegated with wavy leaves; bright indirect light keeps the marbling vivid, and it grows more slowly and bushier than golden pothos.",
+        "es": "Muy variegada en tonos pálidos y con hojas onduladas; la luz indirecta brillante mantiene vivo el jaspeado, y crece más despacio y más tupida que el potos dorado."
+      }
     },
     {
       "name": "Global Green",
       "alsoKnownAs": [],
       "group": null,
-      "description": "Green-on-green variegation: deep-green leaf margins surrounding a lighter mid-green to apple-green centre, with no white or yellow. A relatively recent, eye-catching introduction.",
+      "description": {
+        "en": "Green-on-green variegation: deep-green leaf margins surrounding a lighter mid-green to apple-green centre, with no white or yellow. A relatively recent, eye-catching introduction.",
+        "es": "Variegación verde sobre verde: márgenes de un verde intenso que rodean un centro verde medio a verde manzana más claro, sin blanco ni amarillo. Una introducción relativamente reciente y llamativa."
+      },
       "careNote": null
     },
     {
@@ -172,8 +230,14 @@ export const EXAMPLE_RECORD: SpeciesRecord = {
         "Jade Pothos"
       ],
       "group": null,
-      "description": "Plain, solid deep-green heart-shaped leaves with no variegation. Essentially the non-variegated reference form; vigorous and the most shade-tolerant.",
-      "careNote": "Solid green, so it is the most tolerant of low light of all the cultivars."
+      "description": {
+        "en": "Plain, solid deep-green heart-shaped leaves with no variegation. Essentially the non-variegated reference form; vigorous and the most shade-tolerant.",
+        "es": "Hojas lisas, de un verde intenso sólido, en forma de corazón, sin variegación. Es esencialmente la forma de referencia no variegada; vigorosa y la más tolerante a la sombra."
+      },
+      "careNote": {
+        "en": "Solid green, so it is the most tolerant of low light of all the cultivars.",
+        "es": "Al ser completamente verde, es la más tolerante a la poca luz de todos los cultivares."
+      }
     },
     {
       "name": "Cebu Blue",
@@ -181,8 +245,14 @@ export const EXAMPLE_RECORD: SpeciesRecord = {
         "Blue pothos"
       ],
       "group": null,
-      "description": "Distinctive narrow, elongated lance-shaped leaves with a silvery blue-green metallic sheen; develops natural splits (fenestrations) as it matures and climbs. Often sold as a pothos but botanically usually treated as Epipremnum pinnatum rather than E. aureum.",
-      "careNote": "Often classified under Epipremnum pinnatum, not E. aureum; care is effectively the same as other pothos."
+      "description": {
+        "en": "Distinctive narrow, elongated lance-shaped leaves with a silvery blue-green metallic sheen; develops natural splits (fenestrations) as it matures and climbs. Often sold as a pothos but botanically usually treated as Epipremnum pinnatum rather than E. aureum.",
+        "es": "Hojas distintivas, estrechas, alargadas y lanceoladas, con un brillo metálico azul verdoso plateado; desarrolla hendiduras naturales (fenestraciones) a medida que madura y trepa. A menudo se vende como potos, pero botánicamente suele clasificarse como Epipremnum pinnatum y no como E. aureum."
+      },
+      "careNote": {
+        "en": "Often classified under Epipremnum pinnatum, not E. aureum; care is effectively the same as other pothos.",
+        "es": "A menudo se clasifica bajo Epipremnum pinnatum y no E. aureum; el cuidado es prácticamente el mismo que el de otros potos."
+      }
     }
   ],
   "metadata": {
