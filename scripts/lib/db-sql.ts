@@ -59,3 +59,13 @@ export const BLOGPOST_UPSERT_AS_DRAFT_SQL = BLOGPOST_UPSERT_SQL + ', `status` = 
 export function selectBlogpostUpsertSql(isCurrentlyPublished: boolean): string {
   return isCurrentlyPublished ? BLOGPOST_UPSERT_AS_DRAFT_SQL : BLOGPOST_UPSERT_SQL;
 }
+
+// Repot sign upsert — idempotent on the namespaced slug PK. A re-curation REVISES text and evidence class;
+// ids are never recycled for a different meaning. `active` is forced back TRUE here because a sign the
+// current run returned is, by definition, still applicable.
+export const REPOT_SIGN_UPSERT_SQL =
+  'INSERT INTO `repot_signs` (`id`, `species_slug`, `label_en`, `label_es`, `help_en`, `help_es`, `evidence`, `active`, `sort_order`) ' +
+  'VALUES (?, ?, ?, ?, ?, ?, ?, TRUE, ?) ' +
+  'ON DUPLICATE KEY UPDATE `label_en` = VALUES(`label_en`), `label_es` = VALUES(`label_es`), ' +
+  '`help_en` = VALUES(`help_en`), `help_es` = VALUES(`help_es`), `evidence` = VALUES(`evidence`), ' +
+  '`active` = TRUE, `sort_order` = VALUES(`sort_order`)';
