@@ -104,6 +104,16 @@ The curated care record. Sections with a cross-field invariant are listed under 
 | `hardinessMinC` | number | required |  |
 | `hardinessMaxC` | number | required |  |
 
+#### `cultivars`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `name` | string | required |  |
+| `alsoKnownAs` | array of string | optional |  |
+| `group` | string \| null | required |  |
+| `description` | string \| object | required | What this cultivar looks like. REQUIRED IN BOTH LOCALES — { "en": "…", "es": "…" }. |
+| `careNote` | string \| object \| null | required | Optional care nuance for this cultivar, in both locales; null when there is none. |
+
 #### `metadata`
 
 | Field | Type | Required |
