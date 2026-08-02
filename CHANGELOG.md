@@ -29,6 +29,11 @@ whoever operates this agent, not a commit dump.
     two separate channels: the timeline (a record's own images, with their own dates and metadata) and an
     attachment (an image you attach to the message you are sending right now, with no date or metadata of
     its own). It will not file an attachment as though it were part of a record's history.
+- **The researcher now curates two juvenile figures per species, each with cited evidence.** Every curation
+  now researches how long the species counts as young (`juvenilePeriodMonths`) and how often a young
+  specimen is potted on while it does (`juvenileRepotIntervalMonths`) — independently sourced from the
+  adult repotting interval, never derived from it, and left `null` when no source supports a figure rather
+  than guessed.
 
 ### Changed
 
