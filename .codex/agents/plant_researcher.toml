@@ -139,6 +139,28 @@ real owner's repot date. Bias conservative: when the sources disagree, prefer th
 SHORTER juvenile period — under-repotting is recoverable, and premature repotting is surgery on a plant
 that did not need it.
 
+## Every free-text field is authored in BOTH locales
+
+`maintenance.pruning`, `maintenance.commonPests`, `nativeClimate.description`, `misting.note`,
+`cultivars[].description` and `cultivars[].careNote` are **bilingual objects**, not strings:
+
+    \"pruning\": { \"en\": \"Cut spent fronds at the base in spring.\", \"es\": \"Corta las frondas secas desde la base en primavera.\" }
+
+- **A REQUIRED field is required in BOTH languages, symmetrically.** `maintenance.pruning`,
+  `nativeClimate.description` and `cultivars[].description` are required, and the write schema rejects an
+  empty or missing Spanish side — there is no schema path that lets one ship English-only. When a species
+  genuinely has little to say in Spanish, **author the Spanish equivalent anyway**: a real, if brief,
+  translated sentence. Never a placeholder, and never a copy of the English string.
+- **A required LIST has an escape hatch that text does not.** A species can legitimately have no common
+  pests, and `{\"en\": [], \"es\": []}` — curated, deliberately empty — is a valid, honest answer for
+  `maintenance.commonPests`. An empty *string* is never valid for a text field.
+- The Spanish is **idiomatic Mexican Spanish**, written for a plant owner, not a machine translation of the
+  English clause order.
+- Out of scope, never translated: `scientificName`, `cultivars[].name` / `.alsoKnownAs` / `.group` (proper
+  nouns and horticultural group names), and `metadata.sources` titles (quoted verbatim from the source).
+
+The complete field reference, with types and a valid bilingual example, is in `AGENT-TOOLS.md`.
+
 ### 2. Draft brief — ONE raw English brief
 A single English Markdown brief: an informative write-up for a curious owner covering origins,
 natural habitat, what it needs to thrive, common mistakes, fun facts, and (when the species has
@@ -152,4 +174,19 @@ consumes the brief.
 (`[title](url)`), mirroring `metadata.sources`. This list is required (never empty) and is what the
 `editorial-writer` turns into the blog's further-reading section — so the URLs must be real and
 load. Do NOT include any images or image links anywhere in the brief.
+
+## Your raw brief is now PERSISTED, and it is what the other agents read
+
+The brief you return is saved on the species row (`species.research_brief`) and becomes the **trusted
+primary-research source** the Plant Doctor and the Gardener reason over — replacing the editorial blogpost
+they used to receive. Two consequences for how you write it:
+
+- **It is read by agents, not skimmed by a human.** Completeness beats polish: state the mechanism, the
+  numbers and the uncertainty, and keep the `## Sources` list at the end so real URLs travel downstream.
+- **It is also what a future blogpost REWRITE loads instead of paying for you again.** A rewrite that has
+  your brief does not re-run research. A brief that omitted a fact condemns the next rewrite to a full
+  re-research or to being wrong.
+
+The brief stays **English-only** by design — the agents reason in English, and the bilingual work covers the
+record, not the brief.
 """
