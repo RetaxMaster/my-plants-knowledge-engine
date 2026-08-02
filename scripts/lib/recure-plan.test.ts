@@ -27,6 +27,8 @@ const record = {
   nativeClimate: { description: 'Humid tropical forests.', hardinessMinC: 7, hardinessMaxC: 32 },
   cultivars: [],
   growthHabit: null,
+  juvenilePeriodMonths: null,
+  juvenileRepotIntervalMonths: null,
   metadata: {
     confidence: 'high',
     sources: [{ title: 'RHS', url: 'https://www.rhs.org.uk/', accessedAt: '2026-06-18' }],

@@ -106,6 +106,18 @@ It returns a complete draft record + ONE raw English brief, and never writes fil
   `metadata.sources`) so real URLs travel downstream, and it contains NO images or image links
   (image sourcing is the human operator's job — copyright).
 
+**The two JUVENILE figures are care-engine inputs and must be researched, not guessed.** A curation now
+carries `juvenilePeriodMonths` (the age below which this species is treated as young) and
+`juvenileRepotIntervalMonths` (how often a young specimen is potted on). Both are positive whole months or
+`null`, and both must be backed by a cited source: time-to-maturity / end-of-establishment for the first,
+nursery potting-on practice for the second. `repotting.typicalIntervalMonths` remains the ADULT figure and
+is unchanged. **Do not derive the juvenile interval from the adult one** — no horticultural source states
+a pot-series ratio as a law, and the app asks for the figure precisely because asking beats deriving. When
+no source supports a figure, set it to `null`: the engine falls back to the adult interval, which is
+exactly today's behaviour, and missing data never shifts a schedule. Bias conservative when sources
+disagree — prefer the longer interval and the shorter juvenile period, because premature repotting is
+surgery on a plant that did not need it.
+
 ## Step 2.5 — Editorialize (the house voice)
 
 Invoke the `editorial_writer` subagent (you, the operator, invoke it — a subagent cannot invoke
