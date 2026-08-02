@@ -16,15 +16,16 @@ self-reference and H1 title. Change one → apply the same change to the other.
 surface data (`db:list` = the catalog, `db:find` = one species' full data). You reason over that
 data and judge, critically, whether it is truly the same species.
 
-## Delegating to the two roles (Claude and Codex)
+## Delegating to the three roles (Claude and Codex)
 
-Both runtimes drive the SAME two-role curation pipeline; only the delegation syntax differs. The role
-separation is a correctness guarantee: the `plant_researcher` is the only role allowed to establish facts;
-the `editorial_writer` is forbidden from inventing any. A subagent can never invoke another subagent — you,
-the operator, invoke both.
+Both runtimes drive the SAME curation pipeline; only the delegation syntax differs. The role separation is a
+correctness guarantee: the `plant_researcher` is the only role allowed to establish facts; the
+`editorial_writer` is forbidden from inventing any; the `repot_signs_researcher` CLASSIFIES evidence and never
+supplies a number the engine multiplies. A subagent can never invoke another subagent — you, the operator,
+invoke all three.
 
-- **On Claude:** the `Task` tool with the subagent name (`plant_researcher`, `editorial_writer`), whose
-  definitions live in `.claude/agents/*.md`.
+- **On Claude:** the `Task` tool with the subagent name (`plant_researcher`, `editorial_writer`,
+  `repot_signs_researcher`), whose definitions live in `.claude/agents/*.md`.
 - **On Codex:** a typed spawn — `agent_type` selects the role's `.codex/agents/<role>.toml` (generated from
   `.claude/agents/*.md`; never hand-edit a `.toml`). A spawn with NO `agent_type` is a generic agent with
   none of this repo's doctrine (plausible-looking, wrong). `task_name` is a UNIQUE execution label and must
@@ -36,6 +37,9 @@ the operator, invoke both.
     then `wait_agent(...)`.
   - Editorial phase:
     `spawn_agent(task_name="editorial_<slug>_r1", agent_type="editorial_writer", message="Turn this raw English brief + draft record into the seven-key blogpost JSON.", fork_turns="none")`
+    then `wait_agent(...)`.
+  - Repot-signs phase:
+    `spawn_agent(task_name="repot_signs_<slug>_r1", agent_type="repot_signs_researcher", message="Research the observable repotting signs for <scientific name> from this brief; return the bilingual sign drafts JSON array with an evidence class, rationale and source for each.", fork_turns="none")`
     then `wait_agent(...)`.
 
   **Trust + generation.** Codex only loads `.codex/config.toml` + `.codex/agents/` if this checkout is
@@ -156,6 +160,37 @@ seven-key JSON, and you call the tool. You own the tools; the writer owns the co
 (Step 3) keeps its *review status* honest — `db:insert` automatically returns a previously-published post
 to DRAFT on this enrich (no flag needed), and you then verify with `db:find`.
 
+## Step 2.6 — Repot signs (classify, never weight)
+
+Invoke the `repot_signs_researcher` subagent (you, the operator, invoke it — a subagent cannot invoke another
+subagent; see "Delegating to the three roles" for the syntax on your runtime). Hand it the scientific name and
+the `plant_researcher`'s raw brief. In ENRICH mode, also hand it this species' existing sign rows
+(`npm run db:find -- --repot-signs <slug>`), so it keeps every `semanticSlug` that still applies.
+
+**What comes back:** a JSON array of sign drafts — a semantic slug, both locales' label, optional help text,
+an evidence class (`definitive` / `strong` / `suggestive` / `ambiguous`), a sortOrder, and the **rationale and
+source for that class**.
+
+**The boundary that matters, and why it is not negotiable: the KE CLASSIFIES; the engine CALIBRATES.** An
+evidence class is a false-positive-rate claim about the world — "how often does this sign appear when the plant
+does NOT need repotting?" — and sources can answer it. A numeric weight inside our likelihood function has no
+external ground truth; no source states "roots at drainage = 0.7". Never return, invent, or accept a weight.
+The class→number mapping lives in the API's engine, each value with its own `docs/care-engine.md` §7.10
+ledger row.
+
+**⚠️ Never re-author a universal sign.** The app seeds the signs true of every potted plant (roots through the
+drainage holes, water running straight through, a pot split or deformed, roots circling the surface, drying out
+much faster, growth stalled). A species row restating one of them is a DUPLICATE and would be counted twice in
+the engine's score. The writer REJECTS it — that rejection is a real defect being caught, not a nuisance.
+
+**Save the array** as `<slug>.repot-signs.draft.json` beside the record and brief drafts, then persist it in
+Step 3.
+
+**Ids are permanent.** The writer composes the stored id as `<species-slug>--<semanticSlug>`; the double dash
+is the reserved separator and may not appear inside either half. A re-curation **UPSERTS by id**: text and
+evidence class may be revised, ids are never recycled for a different meaning, and a sign that stops applying
+is **DEACTIVATED, never deleted** — a recorded observation must keep its referent for the life of the plant.
+
 ## Step 3 — Validate, persist, clean up
 
 1. Write the returned drafts to temp files: `<slug>.draft.json` (the record) and
@@ -175,6 +210,14 @@ to DRAFT on this enrich (no flag needed), and you then verify with `db:find`.
    `slug === speciesSlug`). Re-running enriches the engine-owned text (title/excerpt/body) but **never**
    clobbers a human's `status`, cover, YouTube, CTA, or `published_at`. The `blogposts`/`species` tables
    are created by `my-plants-api`'s migration, which must have run first. Never write rows by hand.
+
+   Pass the sign drafts with `--repot-signs <slug>.repot-signs.draft.json`. The writer validates every row
+   against the shared `repotSignDraftSchema` — which `.extend()`s `repotSignContentSchema` with
+   `semanticSlug`, `sortOrder`, `rationale` and `source`, so the bilingual-label rule below is inherited, not
+   restated (a blank or missing `labelEs` is REJECTED, never silently coerced to English), composes and
+   re-validates each id, rejects a duplicate of a universal sign, upserts by id, and DEACTIVATES any
+   previously-curated sign this run omitted. `db:recure` writes THREE artifacts — the species `record`, the
+   `research_brief`, and these sign rows.
 
    **Draft-on-edit invariant (enrichment of an existing post) — enforced automatically.** An engine edit
    must never silently change what the public sees. `db:insert` enforces this deterministically: before
