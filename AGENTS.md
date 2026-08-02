@@ -48,7 +48,8 @@ the operator, invoke both.
 Everything that reads, explains, or investigates — which is why this chat exists:
 
 - **Inspect what is already curated.** `npm run db:list` is the catalog; `npm run db:find -- <name>` is
-  one species' full data; `npm run db:dump` exports. These are read-only.
+  one species' full data; `npm run db:brief -- --name "<name>"` is its saved raw research brief;
+  `npm run db:dump` exports. These are read-only.
 - **Validate an existing draft record** against the shared contract: `npm run validate -- --record <file>`.
   Never hand-edit values to force a pass — a failing record is a finding, not an obstacle.
 - **Research, explain, and answer questions** about a species, the data, the scripts, or this repo.
@@ -105,6 +106,10 @@ It returns a complete draft record + ONE raw English brief, and never writes fil
 - **Sources & images:** the raw brief always ends with a `## Sources` list (Markdown links mirroring
   `metadata.sources`) so real URLs travel downstream, and it contains NO images or image links
   (image sourcing is the human operator's job — copyright).
+- **The raw brief is now PERSISTED, and it is what the doctor and the gardener read.** It is saved on the
+  species row and becomes the trusted primary-research source those agents reason over, replacing the
+  editorial blogpost they used to receive. Save it as `<slug>.brief.md` beside the other drafts — it is no
+  longer a scratch artifact that dies with the session.
 
 **The two JUVENILE figures are care-engine inputs and must be researched, not guessed.** A curation now
 carries `juvenilePeriodMonths` (the age below which this species is treated as young) and
@@ -163,7 +168,7 @@ to DRAFT on this enrich (no flag needed), and you then verify with `db:find`.
    blogpost payload is validated by `db:insert` itself against the shared `blogpost` contract in the
    next step, the same way the record is — you do not hand-edit it either.)
 3. **Persist (the ONLY way knowledge enters the DB):**
-   `set -a; source .env; set +a && npm run db:insert -- --record <slug>.draft.json --blogpost <slug>.blogpost.draft.json`
+   `set -a; source .env; set +a && npm run db:insert -- --record <slug>.draft.json --brief <slug>.brief.md --blogpost <slug>.blogpost.draft.json`
    (tsx does not auto-load `.env`). It re-validates the record, **assembles-then-validates** the
    blogpost against the shared `@retaxmaster/my-plants-species-schema` `blogpost` contract, and — in one
    transaction — **upserts** the `species` record **and** a related **DRAFT** blogpost (`status = 0`,
@@ -233,6 +238,19 @@ touch the DB by hand; you go through the deterministic scripts and you change **
 re-research it or change other fields on your own. Deleting a species is out of scope — these scripts
 only read and upsert. The no-images rule still holds (notes, never real images).
 
+## Rewriting a blogpost does not re-research
+
+When the owner asks for a blogpost to be **rewritten or restyled** for a species that already has a saved
+brief, load the saved brief (`npm run db:brief -- --name "<scientific name>"`) and hand it to the
+`editorial_writer`. **Do not run the research phase.**
+
+- **Re-research only when the owner explicitly asks for it, or when the species has no saved brief.**
+- A species with **no** saved brief cannot be rewritten cheaply. `db:brief` reports `NO_BRIEF` for exactly
+  that case. **Say so plainly and offer the full run** — do not quietly reconstruct a brief from the existing
+  blogpost, which is the editorial *reinterpretation* of research, not the research.
+- The reason this rule exists is cost: a research run is the expensive half of this pipeline, and a rewrite
+  that re-runs it pays twice for one set of facts.
+
 ## Rules
 
 - **You NEVER diagnose-and-fix failures — you report and STOP. Fixing things is not your role.** If
@@ -267,6 +285,20 @@ only read and upsert. The no-images rule still holds (notes, never real images).
 - The schema in `@retaxmaster/my-plants-species-schema` is the single source of truth for the
   record shape, and the slug is derived by its `toSpeciesSlug`. Never persist a record that
   hasn't passed `validate`. The contract is imported, never copied — do not fork the record shape.
+- **Every free-text field in the record is authored in BOTH locales — and "required" means required in both.**
+  `maintenance.pruning`, `maintenance.commonPests`, `nativeClimate.description`, `misting.note`,
+  `cultivars[].description` and `cultivars[].careNote` are bilingual objects
+  (`{"en": "…", "es": "…"}`). The write gate REJECTS a bare string or array — that is the legacy
+  English-only shape. When a species genuinely has little to say in Spanish for a required field, author the
+  Spanish equivalent anyway: a real, if brief, translated sentence, in idiomatic Mexican Spanish — never a
+  placeholder and never a copy of the English. A required LIST has an escape hatch text does not:
+  `{"en": [], "es": []}` is a valid, honest "this species has no common pests". Proper nouns
+  (`scientificName`, cultivar names, group names) and source titles are never translated.
+- **`db:recure` is the RE-CURATION mode, and it is not a substitute for `db:insert`.** It writes the species
+  record, the research brief and that species' repot-sign rows, and it **never touches the blogpost row** —
+  not its status, not its body, not its images. It exists for the owner's one-time, budgeted re-curation
+  milestone; the owner drives blogpost rewrites himself afterwards. `db:insert` remains the full-curation
+  path and keeps the draft-on-edit behaviour.
 - **Be a critical taxonomist.** Sibling species and subspecies/cultivars share names and looks;
   never conflate them when deciding existence. When unsure that a stored row is the same taxon,
   treat it as a different species (fresh), not an enrichment.
