@@ -14,9 +14,9 @@ const record = {
   humidity: { minimumPct: 50, idealPct: 80 },
   fertilizing: { activeSeasons: ['spring', 'summer'], inSeasonFrequencyDays: 30, reduceInDormancy: true },
   repotting: { typicalIntervalMonths: 18, signs: [] },
-  maintenance: { pruning: 'Trim dead fronds.', rotationDays: 14, leafCleaningDays: null, commonPests: [] },
-  nativeClimate: { description: 'Humid tropical forests.', hardinessMinC: 7, hardinessMaxC: 32 },
-  cultivars: [{ name: 'Bostoniensis', alsoKnownAs: [], group: null, description: 'Arching, finely divided fronds.', careNote: null }],
+  maintenance: { pruning: { en: 'Trim dead fronds.', es: null }, rotationDays: 14, leafCleaningDays: null, commonPests: { en: [], es: null } },
+  nativeClimate: { description: { en: 'Humid tropical forests.', es: null }, hardinessMinC: 7, hardinessMaxC: 32 },
+  cultivars: [{ name: 'Bostoniensis', alsoKnownAs: [], group: null, description: { en: 'Arching, finely divided fronds.', es: null }, careNote: null }],
   growthHabit: null,
   juvenilePeriodMonths: null,
   juvenileRepotIntervalMonths: null,
@@ -35,9 +35,21 @@ describe('buildSpeciesRow', () => {
   });
 });
 
+// validateRecord() re-runs the shared package's TOLERANT read parse, whose object arm requires a fully
+// bilingual { en, es } pair (both non-empty strings) — an { en, es: null } value (the legacy-upgrade OUTPUT
+// shape `record` above carries, needed to satisfy `satisfies SpeciesRecord`) is not valid parse INPUT. These
+// two tests re-validate a draft, so they feed the parser the bare-string/array LEGACY input form instead
+// (still a supported input shape) rather than inventing Spanish text just to make the object arm parse.
 describe('buildSpeciesRow persists the growthHabit "other" reason (BLOCKER 8)', () => {
   it('embeds growthHabitOtherReason in the persisted recordJson for an "other" curation', () => {
-    const draft = { ...record, growthHabit: 'other', growthHabitOtherReason: 'Mixed rosette-and-trailing form.' };
+    const draft = {
+      ...record,
+      maintenance: { ...record.maintenance, pruning: record.maintenance.pruning.en, commonPests: record.maintenance.commonPests.en },
+      nativeClimate: { ...record.nativeClimate, description: record.nativeClimate.description.en },
+      cultivars: [{ ...record.cultivars[0], description: record.cultivars[0].description.en }],
+      growthHabit: 'other',
+      growthHabitOtherReason: 'Mixed rosette-and-trailing form.',
+    };
     const parsed = validateRecord(draft); // strips the non-schema reason from parsed.record
     expect(parsed.ok).toBe(true);
     if (!parsed.ok) return;
@@ -48,7 +60,13 @@ describe('buildSpeciesRow persists the growthHabit "other" reason (BLOCKER 8)', 
   });
 
   it('adds no curationMeta for a real habit', () => {
-    const parsed = validateRecord({ ...record, growthHabit: 'trailing' });
+    const parsed = validateRecord({
+      ...record,
+      maintenance: { ...record.maintenance, pruning: record.maintenance.pruning.en, commonPests: record.maintenance.commonPests.en },
+      nativeClimate: { ...record.nativeClimate, description: record.nativeClimate.description.en },
+      cultivars: [{ ...record.cultivars[0], description: record.cultivars[0].description.en }],
+      growthHabit: 'trailing',
+    });
     if (!parsed.ok) throw new Error('fixture should parse');
     const persisted = JSON.parse(buildSpeciesRow(parsed.record).recordJson);
     expect(persisted.curationMeta).toBeUndefined();
