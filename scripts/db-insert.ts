@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import { buildSpeciesRow, buildBlogpostRow } from './lib/db-row.js';
-import { validateRecord } from './lib/validate.js';
+import { validateWritableRecord } from './lib/validate.js';
 import { connectToDb } from '@retaxmaster/my-plants-species-schema/agent-kit/db';
 import { type RowDataPacket } from 'mysql2/promise';
 import { BlogpostStatus } from '@retaxmaster/my-plants-species-schema';
@@ -37,7 +37,7 @@ async function main(): Promise<void> {
     console.error(`✗ ${values.record} is not valid JSON: ${(err as Error).message}`);
     process.exit(1);
   }
-  const validated = validateRecord(draft);
+  const validated = validateWritableRecord(draft);
   if (!validated.ok) {
     console.error(`✗ ${values.record} failed validation; not inserting:`);
     for (const issue of validated.issues) console.error(`  - ${issue}`);

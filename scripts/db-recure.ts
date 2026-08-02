@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import { connectToDb } from '@retaxmaster/my-plants-species-schema/agent-kit/db';
-import { validateRecord } from './lib/validate.js';
+import { validateWritableRecord } from './lib/validate.js';
 import { buildRecurePlan } from './lib/recure-plan.js';
 
 // RE-CURATION mode (Spec 3 §3.2). Writes the species `record` + its `research_brief` — and, when
@@ -31,7 +31,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const validated = validateRecord(draft);
+  const validated = validateWritableRecord(draft);
   if (!validated.ok) {
     console.error(`✗ ${values.record} failed validation; not writing:`);
     for (const issue of validated.issues) console.error(`  - ${issue}`);
