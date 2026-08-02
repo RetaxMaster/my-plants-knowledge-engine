@@ -4,9 +4,10 @@ import { buildSpeciesRow, buildBlogpostRow } from './lib/db-row.js';
 import { validateWritableRecord } from './lib/validate.js';
 import { connectToDb } from '@retaxmaster/my-plants-species-schema/agent-kit/db';
 import { type RowDataPacket } from 'mysql2/promise';
-import { BlogpostStatus } from '@retaxmaster/my-plants-species-schema';
+import { BlogpostStatus, type RepotSignRow } from '@retaxmaster/my-plants-species-schema';
 import { SPECIES_UPSERT_SQL, selectBlogpostUpsertSql } from './lib/db-sql.js';
 import { parseBlogpostPayload } from './lib/parse-payload.js';
+import { buildRepotSignRows, writeRepotSigns } from './lib/repot-signs.js';
 
 // Persist ONE curated species into the API-owned DB: the `species` record row AND its related
 // `blogposts` row, in a single transaction. The blogpost is created DRAFT (status = 0); publishing is a
@@ -19,12 +20,13 @@ async function main(): Promise<void> {
       record: { type: 'string' },
       brief: { type: 'string' },
       blogpost: { type: 'string' },
+      'repot-signs': { type: 'string' },
     },
   });
   if (!values.record || !values.brief || !values.blogpost) {
     console.error(
       'Usage: npm run db:insert -- --record <slug>.draft.json --brief <slug>.brief.md ' +
-        '--blogpost <slug>.blogpost.draft.json',
+        '--blogpost <slug>.blogpost.draft.json [--repot-signs <slug>.repot-signs.draft.json]',
     );
     process.exit(2);
   }
@@ -82,8 +84,33 @@ async function main(): Promise<void> {
   const speciesRow = buildSpeciesRow(validated.record, draft, researchBrief);
   const bp = blogpost.row;
 
-  // 4) Persist BOTH in one transaction on one connection. NOW(3) for updated_at is inline in the SQL,
-  //    so the bindings are exactly the 10 value columns.
+  // 3b) Optional repot-sign drafts. Parsed and BUILT (validated) here, before the transaction opens, so a
+  //    bad draft never leaves a half-written species — the same "validate before you touch the DB"
+  //    discipline as the record and blogpost above.
+  let repotSignRows: RepotSignRow[] | undefined;
+  if (values['repot-signs']) {
+    let repotSignDrafts: unknown;
+    try {
+      repotSignDrafts = JSON.parse(await readFile(values['repot-signs'], 'utf8'));
+    } catch (err) {
+      console.error(`✗ ${values['repot-signs']} is not valid JSON: ${(err as Error).message}`);
+      process.exit(1);
+    }
+    if (!Array.isArray(repotSignDrafts)) {
+      console.error(`✗ ${values['repot-signs']} must be a JSON array of repot sign drafts.`);
+      process.exit(1);
+    }
+    try {
+      repotSignRows = buildRepotSignRows(speciesRow.slug, repotSignDrafts);
+    } catch (err) {
+      console.error(`✗ ${values['repot-signs']} failed repot sign validation; not inserting:`);
+      console.error(`  - ${(err as Error).message}`);
+      process.exit(1);
+    }
+  }
+
+  // 4) Persist BOTH (plus the optional repot signs) in one transaction on one connection. NOW(3) for
+  //    updated_at is inline in the SQL, so the bindings are exactly the 10 value columns.
   // D1 auto-detect (forget-proof; no operator flag): decide DRAFT-vs-preserve from the CURRENT stored
   // status, read inside the transaction just before the upsert. Declared out here so the success log can
   // report honestly what happened.
@@ -108,6 +135,7 @@ async function main(): Promise<void> {
       speciesRow.recordJson,
       speciesRow.researchBrief,
     ]);
+    if (repotSignRows) await writeRepotSigns(conn, speciesRow.slug, repotSignRows);
     await conn.execute(selectBlogpostUpsertSql(wasPublished), [
       bp.slug,
       bp.speciesSlug,
