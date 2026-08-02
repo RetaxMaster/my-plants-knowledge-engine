@@ -11,6 +11,7 @@
     "db:dump": "tsx scripts/db-dump.ts",
     "db:brief": "tsx scripts/db-brief.ts",
     "db:insert": "tsx scripts/db-insert.ts",
+    "db:recure": "tsx scripts/db-recure.ts",
     "agents:generate": "agent-kit-codex-agents",
     "agents:check": "agent-kit-codex-agents --check",
     "agents:check-schema": "agent-kit-codex-spawn-schema",
