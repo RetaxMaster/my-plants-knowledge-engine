@@ -5,18 +5,26 @@ import {
   type SpeciesRecord,
 } from '@retaxmaster/my-plants-species-schema';
 
-// The `species` table row the engine upserts. Post-migration-0009 the brief columns are GONE — the
-// human-readable guide now lives in the related `blogposts` row (see buildBlogpostRow), not here.
+// The `species` table row the engine upserts. Post-migration-0009 the OLD brief columns are gone; the
+// human-readable guide still lives in the related `blogposts` row (see buildBlogpostRow), not here.
+// `researchBrief` (Spec 3 §3.1) is a DIFFERENT artifact — the plant_researcher's raw brief — restored
+// under a new name.
 export interface SpeciesRow {
   slug: string;
   scientificName: string;
   recordJson: string;
+  /** The plant_researcher's raw brief (Spec 3 §3.1). Null only where no brief was produced. */
+  researchBrief: string | null;
 }
 
 // growthHabit 'other' MUST persist WHY (BLOCKER 8 / spec §2.3). The shared schema has no reason field, so
 // store it as a namespaced audit key on the persisted record JSON — durable in the `species.record` column,
 // ignored by the API's schema parse. Read it from the ORIGINAL draft (validateRecord strips unknown keys).
-export function buildSpeciesRow(record: SpeciesRecord, draft?: unknown): SpeciesRow {
+export function buildSpeciesRow(
+  record: SpeciesRecord,
+  draft?: unknown,
+  researchBrief: string | null = null,
+): SpeciesRow {
   const stored: Record<string, unknown> = { ...record };
   if (record.growthHabit === 'other') {
     const reason = String(
@@ -24,10 +32,16 @@ export function buildSpeciesRow(record: SpeciesRecord, draft?: unknown): Species
     ).trim();
     if (reason) stored.curationMeta = { growthHabitOtherReason: reason };
   }
+  // A whitespace-only brief is a silent data loss dressed as a success: the column would be non-null, so
+  // every consumer would stop falling back to the blogpost and would hand the agent nothing at all.
+  if (researchBrief !== null && researchBrief.trim().length === 0) {
+    throw new Error('buildSpeciesRow: the research brief is empty — pass null, or pass a real brief.');
+  }
   return {
     slug: toSpeciesSlug(record.scientificName),
     scientificName: record.scientificName,
     recordJson: JSON.stringify(stored),
+    researchBrief,
   };
 }
 

@@ -148,3 +148,32 @@ describe('selectBlogpostUpsertSql (D1 — the existing row status decides the st
     expect(selectBlogpostUpsertSql(false)).toBe(BLOGPOST_UPSERT_SQL);
   });
 });
+
+describe('SPECIES_UPSERT_SQL carries the research brief (Spec 3 §3.2)', () => {
+  it('inserts the brief and stamps its timestamp with the DB clock', () => {
+    expect(SPECIES_UPSERT_SQL).toContain('`research_brief`');
+    expect(SPECIES_UPSERT_SQL).toContain('`research_brief_updated_at`');
+    // NOW(3) is an INLINE SQL literal, never a bound parameter and never a JS Date rendered as an ISO
+    // string: MariaDB may reparse an ISO string in the session timezone and shift the stamp by the UTC
+    // offset. Let the database timestamp its own write.
+    expect(SPECIES_UPSERT_SQL).toContain('NOW(3)');
+    expect(SPECIES_UPSERT_SQL).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
+  });
+
+  it('binds exactly FOUR values — slug, scientific_name, record, research_brief', () => {
+    const insertValues = SPECIES_UPSERT_SQL.slice(
+      SPECIES_UPSERT_SQL.indexOf('VALUES ('),
+      SPECIES_UPSERT_SQL.indexOf(') ON DUPLICATE'),
+    );
+    expect((insertValues.match(/\?/g) ?? []).length).toBe(4);
+  });
+
+  it('refreshes the brief on a re-run rather than leaving a stale one beside a fresh record', () => {
+    expect(SPECIES_UPSERT_SQL).toContain('`research_brief` = VALUES(`research_brief`)');
+    expect(SPECIES_UPSERT_SQL).toContain('`research_brief_updated_at` = NOW(3)');
+  });
+
+  it('still touches ONLY the species table', () => {
+    expect(SPECIES_UPSERT_SQL).not.toContain('blogposts');
+  });
+});

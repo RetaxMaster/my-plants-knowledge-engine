@@ -3,10 +3,21 @@
 // DB), matching the Prisma @map names in the API's schema (Spec 1 §5). These run inside ONE transaction
 // in db-insert.ts.
 
-// Species upsert — brief columns are GONE post-migration-0009. Idempotent on the slug PK.
+// Species upsert. Post-migration-0009 the old brief columns were gone; Spec 3 §3.1 brings back a DIFFERENT
+// artifact under a new name — `research_brief` is the plant_researcher's RAW brief, not the human-readable
+// guide (which still lives in the related `blogposts` row). Idempotent on the slug PK.
+//
+// `research_brief_updated_at` is stamped with the DB's OWN clock via an inline NOW(3), never a bound
+// JS timestamp: MariaDB may reparse an ISO string in the session timezone and shift the stamp by the UTC
+// offset. So the bindings are exactly the FOUR value columns.
+//
+// `db:recure` (Spec 3 §3.2) runs THIS SAME statement and simply never executes a blogpost statement — there
+// is deliberately no parallel "recure" SQL constant to drift from this one.
 export const SPECIES_UPSERT_SQL =
-  'INSERT INTO `species` (`slug`, `scientific_name`, `record`) VALUES (?, ?, ?) ' +
-  'ON DUPLICATE KEY UPDATE `scientific_name` = VALUES(`scientific_name`), `record` = VALUES(`record`)';
+  'INSERT INTO `species` (`slug`, `scientific_name`, `record`, `research_brief`, `research_brief_updated_at`) ' +
+  'VALUES (?, ?, ?, ?, NOW(3)) ' +
+  'ON DUPLICATE KEY UPDATE `scientific_name` = VALUES(`scientific_name`), `record` = VALUES(`record`), ' +
+  '`research_brief` = VALUES(`research_brief`), `research_brief_updated_at` = NOW(3)';
 
 // Blogpost upsert — species-linked (slug === species_slug), created DRAFT (status = 0). CRITICAL
 // human-edit safety: the ON DUPLICATE KEY UPDATE clause names ONLY the seven engine-owned text columns

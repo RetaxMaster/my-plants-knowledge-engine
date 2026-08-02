@@ -140,3 +140,18 @@ describe('buildBlogpostRow', () => {
     expect(result.row.coverImagePrompt).toBeNull();
   });
 });
+
+describe('buildSpeciesRow carries the brief', () => {
+  it('passes the brief through verbatim', () => {
+    const row = buildSpeciesRow(record, undefined, '# Brief\n\nLong-form markdown.\n');
+    expect(row.researchBrief).toBe('# Brief\n\nLong-form markdown.\n');
+  });
+
+  it('accepts a null brief — every species predates the field until it is re-cured', () => {
+    expect(buildSpeciesRow(record, undefined, null).researchBrief).toBeNull();
+  });
+
+  it('rejects a whitespace-only brief rather than persisting an empty one', () => {
+    expect(() => buildSpeciesRow(record, undefined, '   \n  ')).toThrow(/brief/i);
+  });
+});
