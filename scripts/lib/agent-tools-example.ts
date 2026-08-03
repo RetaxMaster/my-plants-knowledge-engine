@@ -73,13 +73,7 @@ export const EXAMPLE_RECORD: SpeciesRecord = {
     "reduceInDormancy": true
   },
   "repotting": {
-    "typicalIntervalMonths": 24,
-    "signs": [
-      "Roots growing out of the drainage holes",
-      "Roots circling densely or pushing the plant up out of the pot (root-bound)",
-      "Water runs straight through and the mix dries out very fast",
-      "Noticeably slowed growth and more frequent wilting between waterings"
-    ]
+    "typicalIntervalMonths": 24
   },
   "maintenance": {
     "pruning": {
