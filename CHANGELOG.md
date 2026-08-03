@@ -7,6 +7,18 @@ whoever operates this agent, not a commit dump.
 
 ### Added
 
+- **A new curation step (2.6) researches a species' observable repotting signs and classifies how strongly
+  each one implies it's time.** A dedicated `repot_signs_researcher` subagent — invoked after the researcher
+  and the editorial writer, on every fresh or enrich pass — returns, per sign, a bilingual label, optional
+  help text, and an evidence class (`definitive` / `strong` / `suggestive` / `ambiguous`) with the rationale
+  and source behind that class. It **classifies, never weights**: it can say a sign is strong evidence, but
+  the number the care engine actually multiplies by is ours, not the agent's. It also refuses to re-author
+  any of the app's own universal signs (roots at the drainage holes, a cracked pot, and the like) — those
+  apply to every potted plant and are seeded once, not per species. Sign ids are permanent: a re-curation
+  upserts by id, and a sign that stops applying is deactivated, never deleted, so a plant's already-recorded
+  observation never loses its referent. Persisted with `db:insert --repot-signs <file>` (full curation) or
+  `db:recure` (facts-only re-curation); read a species' current signs anytime with
+  `npm run db:find -- --repot-signs <slug>`.
 - **A generated tool reference, `AGENT-TOOLS.md`.** The engine now ships a complete, always-current field
   reference for the two artifacts it produces — the curated species record and the blogpost — listing every
   field, its type and its full value vocabulary with a valid example, generated from the authoritative shared
