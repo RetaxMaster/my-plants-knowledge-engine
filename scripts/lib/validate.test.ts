@@ -17,7 +17,9 @@ const valid = {
   temperature: { survivalMinC: 5, idealMinC: 18, idealMaxC: 27, survivalMaxC: 35 },
   humidity: { minimumPct: 40, idealPct: 60 },
   fertilizing: { activeSeasons: ['spring', 'summer'], inSeasonFrequencyDays: 14, reduceInDormancy: true },
-  repotting: { typicalIntervalMonths: 24, signs: [] },
+  // NOTE: no `signs` key — D42 removed it from the record and the WRITE schema now REJECTS it outright
+  // (0.19.0). The signs live in the structured `repot_signs` catalogue, curated by `repot_signs_researcher`.
+  repotting: { typicalIntervalMonths: 24 },
   maintenance: { pruning: 'Trim leggy stems.', rotationDays: 14, leafCleaningDays: 30, commonPests: [] },
   nativeClimate: { description: 'Tropical understory.', hardinessMinC: 10, hardinessMaxC: 38 },
   metadata: {
@@ -55,7 +57,9 @@ const CURATED_RECORD = {
   temperature: { survivalMinC: 5, idealMinC: 18, idealMaxC: 27, survivalMaxC: 35 },
   humidity: { minimumPct: 40, idealPct: 60 },
   fertilizing: { activeSeasons: ['spring', 'summer'], inSeasonFrequencyDays: 14, reduceInDormancy: true },
-  repotting: { typicalIntervalMonths: 24, signs: [] },
+  // NOTE: no `signs` key — D42 removed it from the record and the WRITE schema now REJECTS it outright
+  // (0.19.0). The signs live in the structured `repot_signs` catalogue, curated by `repot_signs_researcher`.
+  repotting: { typicalIntervalMonths: 24 },
   maintenance: {
     pruning: { en: 'Trim leggy stems.', es: 'Recorta los tallos alargados.' },
     rotationDays: 14,
