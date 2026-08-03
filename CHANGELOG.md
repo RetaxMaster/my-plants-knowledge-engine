@@ -34,9 +34,35 @@ whoever operates this agent, not a commit dump.
   specimen is potted on while it does (`juvenileRepotIntervalMonths`) — independently sourced from the
   adult repotting interval, never derived from it, and left `null` when no source supports a figure rather
   than guessed.
+- **Research briefs are now persisted on the species row and re-readable via `npm run db:brief`.** The
+  `plant_researcher` subagent's raw English brief — the authoritative research foundation for a species —
+  is now saved to the database alongside the species record. The brief is the single source of truth the
+  Plant Doctor and Gardener agents consult, replacing the editorial blogpost they previously reasoned over.
+  Read your saved briefs anytime with `npm run db:brief -- --name "<scientific name>"` to inspect a
+  species' researched facts before revision or to audit what reasoning the agents receive.
+- **A new `db:recure` mode writes species records, briefs, and repot-sign rows without touching the
+  published guide.** Where `db:insert` is the full-curation path (research → editorial → persist, with
+  draft-on-edit handling for the guide), `db:recure` is the re-curation mode: it persists the species
+  record, the research brief, and repot-sign classifications together, and **never modifies the
+  published blogpost row** — not its status, body, or images. This separates the expensive research step
+  (cached via the saved brief) from the editorial publishing step, so the owner can re-curate facts,
+  refresh sign evidence, and leave guide rewrites for later.
 
 ### Changed
 
+- **Blogpost rewrites now reuse the saved research brief instead of paying for research again.** When
+  you ask to rewrite a published guide for a species that already has a saved brief, the `editorial_writer`
+  subagent now receives that cached brief instead of requiring a fresh research run. This unlocks
+  affordable editorial refreshes: a brief costs research money once; rewrites consume only editorial
+  money thereafter. If a species has no saved brief, the engine reports it plainly and offers the full
+  run (research + editorial) — it does not quietly reconstruct a brief from the existing prose.
+- **All free-text species fields are now authored in both English and Spanish simultaneously.** Species
+  records now require bilingual field values for `maintenance.pruning`, `maintenance.commonPests`,
+  `nativeClimate.description`, `misting.note`, and all `cultivars[].description` and
+  `cultivars[].careNote` fields — no longer English-only. Both locales must be provided; a bare English
+  string or array is rejected by the write schema. The database normalizes and stores the bilingual
+  `{ en, es }` shape, so agents and users see consistent, professionally translated prose in both
+  languages without manual sync.
 - **Internal only — nothing about what this engine does has changed.** Its session-workspace resolver,
   read-only DB helper, and Claude/Codex subagent-parity generator and checker now come from the shared
   species-schema package's `agent-kit` instead of the engine's own `scripts/lib`, which is where the Plant
