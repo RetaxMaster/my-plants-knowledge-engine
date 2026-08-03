@@ -41,11 +41,11 @@ The curated care record you submit for db:insert/db:recure. Sections with a cros
 
 #### `misting`
 
-| Field | Type | Required |
-|---|---|---|
-| `benefit` | `beneficial` \| `tolerated` \| `avoid` | optional |
-| `baseFrequencyDays` | integer (0, ∞] \| null | optional |
-| `note` | object \| null | optional |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `benefit` | `beneficial` \| `tolerated` \| `avoid` | optional |  |
+| `baseFrequencyDays` | integer (0, ∞] \| null | optional |  |
+| `note` | object \| null | optional | Optional misting note. Authored in BOTH locales as { "en": "…", "es": "…" }; a bare string is the legacy English-only shape and is rejected on write. |
 
 #### `light`
 
@@ -87,31 +87,31 @@ The curated care record you submit for db:insert/db:recure. Sections with a cros
 
 #### `maintenance`
 
-| Field | Type | Required |
-|---|---|---|
-| `pruning` | object | required |
-| `rotationDays` | integer (0, ∞] \| null | required |
-| `leafCleaningDays` | integer (0, ∞] \| null | required |
-| `commonPests` | object | required |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `pruning` | object | required | How and when to prune. REQUIRED IN BOTH LOCALES: authored as { "en": "…", "es": "…" }. When a species has little to say in Spanish, write a real short translated sentence — never a placeholder and never a copy of the English string. |
+| `rotationDays` | integer (0, ∞] \| null | required |  |
+| `leafCleaningDays` | integer (0, ∞] \| null | required |  |
+| `commonPests` | object | required | The pests this species commonly gets. Authored as { "en": [...], "es": [...] }. A genuinely pest-free species is an EMPTY list in both locales — that is an honest curated answer, not a gap. |
 
 #### `nativeClimate`
 
-| Field | Type | Required |
-|---|---|---|
-| `description` | object | required |
-| `koppen` | string | optional |
-| `hardinessMinC` | number | required |
-| `hardinessMaxC` | number | required |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `description` | object | required | The species’ native climate in prose. REQUIRED IN BOTH LOCALES — { "en": "…", "es": "…" }. |
+| `koppen` | string | optional |  |
+| `hardinessMinC` | number | required |  |
+| `hardinessMaxC` | number | required |  |
 
 #### `cultivars`
 
-| Field | Type | Required |
-|---|---|---|
-| `name` | string | required |
-| `alsoKnownAs` | array of string | optional |
-| `group` | string \| null | required |
-| `description` | object | required |
-| `careNote` | object \| null | required |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `name` | string | required |  |
+| `alsoKnownAs` | array of string | optional |  |
+| `group` | string \| null | required |  |
+| `description` | object | required | What this cultivar looks like. REQUIRED IN BOTH LOCALES — { "en": "…", "es": "…" }. |
+| `careNote` | object \| null | required | Optional care nuance for this cultivar, in both locales; null when there is none. |
 
 #### `metadata`
 
