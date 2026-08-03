@@ -5,6 +5,12 @@ whoever operates this agent, not a commit dump.
 
 ## Unreleased
 
+### Changed
+
+- Picks up the shared contract's 0.22.0 release. Nothing in the curation pipeline changes — the release adds
+  an agent operation the Knowledge Engine does not use — but the dependency is pinned in step with the rest
+  of the workspace so every repo reads the same contract.
+
 ### Added
 
 - **A new curation step (2.6) researches a species' observable repotting signs and classifies how strongly
