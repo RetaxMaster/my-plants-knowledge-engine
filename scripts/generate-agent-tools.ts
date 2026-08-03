@@ -2,20 +2,29 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { speciesRecordSchema, blogpostInputSchema } from '@retaxmaster/my-plants-species-schema';
+import { speciesRecordWriteSchema, blogpostInputSchema } from '@retaxmaster/my-plants-species-schema';
 import { renderToolDoc, assertInvariantsCover, syncToolDoc, type InvariantMap } from '@retaxmaster/my-plants-species-schema/tool-doc';
 import { EXAMPLE_RECORD, EXAMPLE_BLOGPOST } from './lib/agent-tools-example.js';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(REPO_ROOT, 'AGENT-TOOLS.md');
 
+// The curation tool reference is rendered from `speciesRecordWriteSchema` — the CANONICAL WRITE schema —
+// never from `speciesRecordSchema` (the migration-tolerant reader). The reader accepts a legacy bare
+// string/array for every bilingual field (so old rows keep parsing); the writer requires the `{ en, es }`
+// object in both locales. Rendering from the reader made the Type column advertise `string | object` for
+// every bilingual field while the Description column, in the very same row, said the bare-string form "is
+// rejected on write" — a self-contradicting doc that led an agent to produce a record `db:insert` refuses,
+// burning a research run. `speciesRecordSchema` remains the source for any READ/migration documentation;
+// this generator's job is what the `plant_researcher`/`editorial_writer` must actually submit.
+//
 // Pass ALL top-level record sections AND the blogpost schema to the tripwire so that if ANY of them
 // GAINS a .refine() later (not just today's five record sections), the build fails until it is
 // documented. hasRefinement peels wrappers, so a section like `misting` (a .default()-wrapped .refine())
 // is detected. KNOWN LIMIT: only the TOP node of each entry is inspected — a .refine() on a nested
 // sub-object (e.g. inside `watering`, or on a `cultivars[]` element) is not detected; there are none today.
 const tripwireSections: Record<string, import('zod').ZodTypeAny> = {
-  ...(speciesRecordSchema.shape as Record<string, import('zod').ZodTypeAny>),
+  ...(speciesRecordWriteSchema.shape as Record<string, import('zod').ZodTypeAny>),
   blogpost: blogpostInputSchema,
 };
 
@@ -38,7 +47,7 @@ const body = renderToolDoc({
   title: 'Knowledge Engine — tool reference',
   intro: 'The `plant_researcher` fills the **species record**; the `editorial_writer` fills the **blogpost**. Both are validated on insert. Copy an example below, change the values, and keep every required field.',
   tools: [
-    { name: 'species record', schema: speciesRecordSchema, example: EXAMPLE_RECORD, description: 'The curated care record. Sections with a cross-field invariant are listed under "Cross-field invariants" below.' },
+    { name: 'species record', schema: speciesRecordWriteSchema, example: EXAMPLE_RECORD, description: 'The curated care record you submit for db:insert/db:recure. Sections with a cross-field invariant are listed under "Cross-field invariants" below.' },
     { name: 'blogpost (seven keys)', schema: blogpostInputSchema, example: EXAMPLE_BLOGPOST, description: 'Spanish leads (required); English keys may be null.' },
   ],
   invariants,
