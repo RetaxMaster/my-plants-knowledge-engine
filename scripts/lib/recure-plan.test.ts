@@ -22,7 +22,7 @@ const record = {
   temperature: { survivalMinC: 7, idealMinC: 16, idealMaxC: 24, survivalMaxC: 30 },
   humidity: { minimumPct: 50, idealPct: 80 },
   fertilizing: { activeSeasons: ['spring', 'summer'], inSeasonFrequencyDays: 30, reduceInDormancy: true },
-  repotting: { typicalIntervalMonths: 18, signs: [] },
+  repotting: { typicalIntervalMonths: 18 },
   maintenance: { pruning: { en: 'Trim dead fronds.', es: null }, rotationDays: 14, leafCleaningDays: null, commonPests: { en: [], es: null } },
   nativeClimate: { description: { en: 'Humid tropical forests.', es: null }, hardinessMinC: 7, hardinessMaxC: 32 },
   cultivars: [],

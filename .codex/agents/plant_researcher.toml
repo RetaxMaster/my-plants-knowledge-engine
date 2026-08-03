@@ -57,11 +57,18 @@ A single JSON object conforming to `my-plants-species-schema`. Required sections
 droughtTolerance, temperatureSensitivity, lightSensitivity, **humiditySensitivity**,
 reduceInDormancy), `light` (minimum ≤ ideal ≤ maximum), `temperature` (survivalMinC ≤ idealMinC ≤
 idealMaxC ≤ survivalMaxC), `humidity` (minimumPct ≤ idealPct), `fertilizing` (activeSeasons,
-inSeasonFrequencyDays, reduceInDormancy), `repotting` (typicalIntervalMonths, signs),
+inSeasonFrequencyDays, reduceInDormancy), `repotting` (typicalIntervalMonths),
 `maintenance` (pruning, rotationDays|null, leafCleaningDays|null, commonPests), `misting`
 (benefit, baseFrequencyDays, note), `nativeClimate` (description, koppen?, hardinessMinC ≤
 hardinessMaxC), `cultivars`, `growthHabit`, `juvenilePeriodMonths`, `juvenileRepotIntervalMonths`, and
 `metadata` (confidence, sources:[{title,url,accessedAt:\"YYYY-MM-DD\"}]).
+
+**`repotting` carries only `typicalIntervalMonths`.** Do NOT author a free-text list of repotting
+signs here — the record no longer has that field. A species' repotting signs are authored separately,
+as structured catalogue rows, by the `repot_signs_researcher` subagent: it assigns each sign a stable
+semantic slug, both locales' label, and an ordinal evidence class, from the same research you hand it.
+Two sources for one fact is the fork this project forbids, so leave sign-spotting to that subagent —
+only its catalogue rows can be weighted by the engine or translated for the owner.
 
 **`cultivars` — research ALL the well-known named varieties of the species.** A cultivar is a
 human-selected variety within the SAME species (e.g. *Dracaena fragrans* 'Massangeana', 'Lemon
